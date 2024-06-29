@@ -1,4 +1,4 @@
-## Mokuton is a simple and no-frills word processor. 
+## Mokuton is a simple and no-frills text editor. 
 
 It combines modern aesthetics (a Medium-like interface, a block-style editor) with broad compatibility. It's a single html file that runs on damn near anything, and gives you exactly what you need to write your story - and nothing else. No fonts to worry over. No lengthy packages or libraries to install and download. Just keep it in your browser and write.  
 
@@ -9,7 +9,7 @@ It combines modern aesthetics (a Medium-like interface, a block-style editor) wi
 Modern word processors are fantastic, but they try to do too much for my liking. There's usually immense feature creep in most commercial software; and when it comes to open-source editors, often a stunningly stupid number of libraries and configurations that have to be done. 
 
 After several novels and many papers under my belt, I've moved on from using every feature under the sun to being a much more simple man: 
-1) I want an interface that looks decent, tracks my daily word progress, and in case of a power cut, preserves my data without needing an Internet connection.
+1)  I want an interface that looks friendly (and doesn't look like an IDE), tracks my daily word progress, and in case of a power cut, preserves my data without needing an Internet connection.
 2)  I want to write, not spend the rest of my lifetime configuring environment variables or figuring out a user interface designed to appease every possible slice of the market.
 3)  I want to be able to set the thing up on a new device, especially the low power writing devices that I use, without hassle.  
 
