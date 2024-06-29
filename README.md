@@ -22,20 +22,6 @@ Writing: Click in the main editor area to start writing. Use the toolbar or keyb
 Word Count Goal: Set your daily word count goal in the right sidebar and track your progress.
 Saving: Click the save button or use Ctrl+S to save your work as a Markdown file.
 
-## Keyboard Shortcuts (there is a help menu)
-
--Bold: Ctrl+B
--Italic: Ctrl+I
--Underline: Ctrl+U
--Switch Case: Ctrl+Shift+X
--Bullet List: Ctrl+Shift+L
--Paragraph Style: Ctrl+Alt+0
--Heading 1: Ctrl+Alt+1
--Heading 2: Ctrl+Alt+2
--Load File: Ctrl+O
--Save File: Ctrl+S
--Toggle Help Menu: Ctrl+/
-
 ## License
 Mokuton Editor is open-source software licensed under the MIT license. Please enjoy it. I am not responsible for what you do with it, but I hope it's useful. 
 
