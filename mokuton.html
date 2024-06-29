@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mokuton Editor</title>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F0F0F0;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            margin-left: 250px;
+            margin-right: 100px;
+        }
+
+        #toolbar {
+            width: 100%;
+            max-width: 800px;
+            background-color: #F9F9F9;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-radius: 5px;
+        }
+
+        .toolbar-buttons {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        #toolbar button, #toolbar select {
+            background-color: transparent;
+            border: 1px solid #D0D0D0;
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            color: #444;
+            border-radius: 3px;
+        }
+
+        #toolbar button:hover, #toolbar select:hover {
+            background-color: #E8E8E8;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #logo {
+            font-family: 'Merriweather', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-right: 20px;
+        }
+
+        #editorjs {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 40px;
+            min-height: calc(100vh - 200px);
+            overflow-y: auto;
+            border-radius: 5px;
+            font-family: 'Merriweather', serif;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        #left-sidebar {
+            width: 250px;
+            background-color: #2F3136;
+            color: #DCDDDE;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        #file-explorer {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #file-explorer li {
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #file-explorer li:hover {
+            background-color: #40444B;
+        }
+
+        #right-sidebar {
+            width: 100px;
+            padding: 20px;
+            background-color: #FFFFFF;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+            right: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #progress-meter {
+            width: 60px;
+            height: 80%;
+            background-color: #EBEDF0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-auto-rows: 1fr;
+            gap: 1px;
+        }
+
+        .progress-box {
+            background-color: #EBEDF0;
+            transition: background-color 0.3s;
+        }
+
+        .progress-box.filled {
+            background-color: #39D353;
+        }
+
+        #word-count, #goal-count {
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        #goal-input {
+            width: 80px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .style-select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .style-select-button {
+            background-color: transparent;
+            border: 1px solid #D0D0D0;
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            color: #444;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+        }
+
+        .style-select-button:hover {
+            background-color: #E8E8E8;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .style-select-button::after {
+            content: '\25BC';
+            margin-left: 5px;
+        }
+
+        .style-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+            min-width: 150px;
+        }
+
+        .style-select-wrapper:hover .style-select-dropdown {
+            display: block;
+        }
+
+        .style-select-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .style-select-option:hover {
+            background-color: #F0F0F0;
+        }
+
+        .style-select-option i {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+
+        #help-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+        }
+
+        #help-menu h2 {
+            color: #0078D4;
+            margin-bottom: 15px;
+        }
+
+        #help-menu table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #help-menu th, #help-menu td {
+            border: 1px solid #E0E0E0;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #help-menu th {
+            background-color: #F9F9F9;
+        }
+
+        #close-help {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #0078D4;
+        }
+
+        #select-directory, #back-button {
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        #select-directory:hover, #back-button:hover {
+            background-color: #005A9E;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #select-directory i, #back-button i {
+            margin-right: 5px;
+        }
+
+        #back-button:disabled {
+            background-color: #CCCCCC;
+            cursor: not-allowed;
+        }
+
+        #file-info {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        #start-screen-content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        #start-screen h1 {
+            margin-bottom: 20px;
+        }
+
+        #start-screen p {
+            margin-bottom: 15px;
+        }
+
+        #close-start-screen {
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        @media (max-width: 1200px) {
+            body {
+                flex-direction: column;
+            }
+
+            .main-content {
+                margin-left: 0;
+                margin-right: 0;
+                padding-bottom: 60px;
+            }
+
+            #left-sidebar, #right-sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+
+            #right-sidebar {
+                flex-direction: row;
+                justify-content: center;
+                padding: 10px;
+            }
+
+            #progress-meter {
+                width: 80%;
+                height: 60px;
+                grid-template-columns: repeat(40, 1fr);
+                grid-template-rows: repeat(5, 1fr);
+                margin-top: 0;
+                margin-right: 10px;
+            }
+
+            #word-count, #goal-count, #goal-input {
+                margin-top: 0;
+                margin-left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="left-sidebar">
+        <h2>File Explorer</h2>
+        <button id="select-directory" onclick="selectDirectory()">
+            <i class="fas fa-folder-open"></i> Select Directory
+        </button>
+        <button id="back-button" onclick="navigateBack()" disabled>
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <ul id="file-explorer"></ul>
+    </div>
+    <div class="main-content">
+        <div id="toolbar">
+            <div id="logo">Mokuton Editor</div>
+            <div class="toolbar-buttons">
+                <button onclick="formatText('bold')" title="Bold"><i class="fas fa-bold"></i></button>
+                <button onclick="formatText('italic')" title="Italic"><i class="fas fa-italic"></i></button>
+                <button onclick="formatText('underline')" title="Underline"><i class="fas fa-underline"></i></button>
+                <button onclick="switchCase()" title="Switch Case"><i class="fas fa-font"></i></button>
+                <div class="style-select-wrapper">
+                    <button class="style-select-button" title="Text Style">Paragraph</button>
+                    <div class="style-select-dropdown">
+                        <div class="style-select-option" onclick="changeStyle('paragraph')">
+                            <i class="fas fa-paragraph"></i>Paragraph
+                        </div>
+                        <div class="style-select-option" onclick="changeStyle('heading1')">
+                            <i class="fas fa-heading"></i>Heading 1
+                        </div>
+                        <div class="style-select-option" onclick="changeStyle('heading2')">
+                            <i class="fas fa-heading" style="font-size: 0.9em;"></i>Heading 2
+                        </div>
+                    </div>
+                </div>
+                <button onclick="addBullets()" title="Bullets"><i class="fas fa-list-ul"></i></button>
+                <button onclick="loadFile('main')" title="Load Main"><i class="fas fa-file-upload"></i></button>
+                <button onclick="saveFile('main')" title="Save Main"><i class="fas fa-save"></i></button>
+            </div>
+        </div>
+        <div id="file-info"></div>
+        <div id="editorjs"></div>
+    </div>
+    <div id="right-sidebar">
+        <div id="progress-meter">
+            <!-- Progress boxes will be dynamically added here -->
+        </div>
+        <div id="word-count">0 words</div>
+        <div id="goal-count">Goal: 1000</div>
+        <input type="number" id="goal-input" value="1000" min="1" onchange="updateGoal()">
+    </div>
+
+    <div id="help-menu">
+        <h2>Keyboard Shortcuts</h2>
+        <button id="close-help">&times;</button>
+        <table>
+            <tr>
+                <th>Action</th>
+                <th>Shortcut</th>
+            </tr>
+            <tr>
+                <td>Bold</td>
+                <td>Ctrl+B</td>
+            </tr>
+            <tr>
+                <td>Italic</td>
+                <td>Ctrl+I</td>
+            </tr>
+            <tr>
+                <td>Underline</td>
+                <td>Ctrl+U</td>
+            </tr>
+            <tr>
+                <td>Switch Case</td>
+                <td>Ctrl+Shift+X</td>
+            </tr>
+            <tr>
+                <td>Bullet List</td>
+                <td>Ctrl+Shift+L</td>
+            </tr>
+            <tr>
+                <td>Paragraph Style</td>
+                <td>Ctrl+Alt+0</td>
+            </tr>
+            <tr>
+                <td>Heading 1</td>
+                <td>Ctrl+Alt+1</td>
+            </tr>
+            <tr>
+                <td>Heading 2</td>
+                <td>Ctrl+Alt+2</td>
+            </tr>
+            <tr>
+                <td>Load Main</td>
+                <td>Ctrl+O</td>
+            </tr>
+            <tr>
+                <td>Save Main</td>
+                <td>Ctrl+S</td>
+            </tr>
+            <tr>
+                <td>Toggle Help Menu</td>
+                <td>Ctrl+/</td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="start-screen">
+        <div id="start-screen-content">
+            <h1>Welcome to Mokuton Editor</h1>
+            <p>This is a powerful word processor with a daily word count goal tracker.</p>
+            <p>To get started:</p>
+            <ol style="text-align: left;">
+                <li>Use the left sidebar to explore and open files</li>
+                <li>Write your content in the main editor</li>
+                <li>Set your daily word count goal in the right sidebar</li>
+                <li>Track your progress with the GitHub-style progress meter</li>
+                <li>Use the toolbar for formatting options</li>
+            </ol>
+            <p>Enjoy writing with Mokuton Editor!</p>
+            <button id="close-start-screen">Get Started</button>
+        </div>
+    </div>
+
+    <script>
+        let currentFileName = "Untitled";
+        let wordCountGoal = 1000;
+        let directoryHistory = [];
+        let currentDirectoryIndex = -1;
+
+        // Initialize Editor.js
+        const editor = new EditorJS({
+            holder: 'editorjs',
+            tools: {
+                header: {
+                    class: Header,
+                    config: {
+                        levels: [1, 2, 3],
+                        defaultLevel: 2
+                    }
+                },
+                list: {
+                    class: List,
+                    inlineToolbar: true
+                },
+                paragraph: {
+                    class: Paragraph,
+                    inlineToolbar: true,
+                    config: {
+                        placeholder: 'Tell your story...'
+                    }
+                },
+                quote: {
+                    class: Quote,
+                    inlineToolbar: true
+                },
+                image: Image
+            },
+            data: JSON.parse(localStorage.getItem('editorjsData')) || {},
+            onChange: () => {
+                editor.save().then((outputData) => {
+                    localStorage.setItem('editorjsData', JSON.stringify(outputData));
+                    updateFileInfo();
+                });
+            }
+        });
+
+        // Function to update file info (title, word count, page count) and progress meter
+        function updateFileInfo() {
+            editor.save().then((outputData) => {
+                const wordCount = outputData.blocks.reduce((count, block) => {
+                    return count + (block.data.text ? block.data.text.split(/\s+/).length : 0);
+                }, 0);
+                const pageCount = Math.ceil(wordCount / 250);
+                
+                const fileInfo = document.getElementById('file-info');
+                fileInfo.textContent = `${currentFileName} | Words: ${wordCount} | Pages: ${pageCount}`;
+
+                // Update word count display
+                document.getElementById('word-count').textContent = `${wordCount} words`;
+
+                // Update progress meter
+                updateProgressMeter(wordCount);
+
+                // Save word count to localStorage
+                localStorage.setItem('dailyWordCount', wordCount);
+            });
+        }
+
+        // Function to create and update the progress meter
+        function updateProgressMeter(wordCount) {
+            const progressMeter = document.getElementById('progress-meter');
+            const totalBoxes = 200; // 5 columns x 40 rows
+            const filledBoxes = Math.min(Math.floor((wordCount / wordCountGoal) * totalBoxes), totalBoxes);
+
+            // Clear existing boxes
+            progressMeter.innerHTML = '';
+
+            // Create new boxes
+            for (let i = 0; i < totalBoxes; i++) {
+                const box = document.createElement('div');
+                box.className = 'progress-box';
+                if (i < filledBoxes) {
+                    box.classList.add('filled');
+                }
+                progressMeter.appendChild(box);
+            }
+        }
+
+        // Toolbar functions
+        function formatText(style) {
+            document.execCommand(style, false, null);
+        }
+
+        function switchCase() {
+            const selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                const text = selection.toString();
+                const replacementText = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
+                document.execCommand('insertText', false, replacementText);
+            }
+        }
+
+        function changeStyle(style) {
+            if (style === 'paragraph') {
+                document.execCommand('formatBlock', false, '<p>');
+                document.querySelector('.style-select-button').textContent = 'Paragraph';
+            } else if (style === 'heading1') {
+                document.execCommand('formatBlock', false, '<h1>');
+                document.querySelector('.style-select-button').textContent = 'Heading 1';
+            } else if (style === 'heading2') {
+                document.execCommand('formatBlock', false, '<h2>');
+                document.querySelector('.style-select-button').textContent = 'Heading 2';
+            }
+        }
+
+        function addBullets() {
+            document.execCommand('insertUnorderedList', false, null);
+        }
+
+        // Function to select directory and populate file explorer
+        async function selectDirectory() {
+            try {
+                const directoryHandle = await window.showDirectoryPicker();
+                directoryHistory = [directoryHandle];
+                currentDirectoryIndex = 0;
+                await populateFileExplorer(directoryHandle);
+                updateBackButton();
+            } catch (error) {
+                console.error('Error selecting directory:', error);
+            }
+        }
+
+        // Function to populate file explorer with natural sorting
+        async function populateFileExplorer(directoryHandle) {
+            try {
+                const fileExplorer = document.getElementById('file-explorer');
+                // Clear existing files
+                fileExplorer.innerHTML = '';
+
+                const entries = [];
+                for await (const entry of directoryHandle.values()) {
+                    entries.push(entry);
+                }
+
+                // Sort entries using natural sort order
+                entries.sort((a, b) => naturalCompare(a.name, b.name));
+
+                for (const entry of entries) {
+                    const li = document.createElement('li');
+                    if (entry.kind === 'file') {
+                        li.textContent = entry.name;
+                        li.onclick = async () => {
+                            try {
+                                const file = await entry.getFile();
+                                const content = await file.text();
+                                loadFileContent(content, entry.name);
+                            } catch (error) {
+                                console.error('Error loading file:', error);
+                            }
+                        };
+                    } else if (entry.kind === 'directory') {
+                        li.textContent = `📁 ${entry.name}`;
+                        li.onclick = async () => {
+                            try {
+                                const subDirectoryHandle = await directoryHandle.getDirectoryHandle(entry.name);
+                                directoryHistory = directoryHistory.slice(0, currentDirectoryIndex + 1);
+                                directoryHistory.push(subDirectoryHandle);
+                                currentDirectoryIndex++;
+                                await populateFileExplorer(subDirectoryHandle);
+                                updateBackButton();
+                            } catch (error) {
+                                console.error('Error opening subdirectory:', error);
+                            }
+                        };
+                    }
+                    fileExplorer.appendChild(li);
+                }
+            } catch (error) {
+                console.error('Error populating file explorer:', error);
+            }
+        }
+
+        // Natural sort comparison function
+        function naturalCompare(a, b) {
+            return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+        }
+
+        // Function to navigate back to the previous directory
+        async function navigateBack() {
+            if (currentDirectoryIndex > 0) {
+                currentDirectoryIndex--;
+                const previousDirectory = directoryHistory[currentDirectoryIndex];
+                await populateFileExplorer(previousDirectory);
+                updateBackButton();
+            }
+        }
+
+        // Function to update the state of the back button
+        function updateBackButton() {
+            const backButton = document.getElementById('back-button');
+            backButton.disabled = currentDirectoryIndex <= 0;
+        }
+
+        // Function to load file content into the editor
+        function loadFileContent(content, fileName) {
+            try {
+                // Try to parse the content as JSON
+                const jsonContent = JSON.parse(content);
+                editor.render(jsonContent);
+            } catch (error) {
+                // If parsing as JSON fails, treat it as plain text
+                console.log('Loading as plain text');
+                const blocks = content.split('\n').map(line => ({
+                    type: 'paragraph',
+                    data: {
+                        text: line.trim()
+                    }
+                })).filter(block => block.data.text !== ''); // Remove empty lines
+
+                editor.render({
+                    blocks: blocks
+                });
+            }
+            currentFileName = fileName;
+            updateFileInfo();
+        }
+
+        // Function to load file content
+        async function loadFile(section) {
+            try {
+                const [fileHandle] = await window.showOpenFilePicker();
+                const file = await fileHandle.getFile();
+                const content = await file.text();
+                
+                if (section === 'main') {
+                    loadFileContent(content, file.name);
+                }
+            } catch (error) {
+                console.error('Error loading file:', error);
+            }
+        }
+
+        // Function to save file content
+        async function saveFile(section) {
+            try {
+                const options = {
+                    types: [
+                        {
+                            description: 'Markdown Files',
+                            accept: {'text/markdown': ['.md']},
+                        },
+                    ],
+                };
+                const fileHandle = await window.showSaveFilePicker(options);
+                const writable = await fileHandle.createWritable();
+                
+                let content;
+                if (section === 'main') {
+                    const editorContent = await editor.save();
+                    content = convertToMarkdown(editorContent);
+                }
+                
+                await writable.write(content);
+                await writable.close();
+            } catch (error) {
+                console.error('Error saving file:', error);
+            }
+        }
+
+        // Function to convert Editor.js content to Markdown
+        function convertToMarkdown(editorData) {
+            let markdown = '';
+            
+            for (const block of editorData.blocks) {
+                switch (block.type) {
+                    case 'header':
+                        markdown += '#'.repeat(block.data.level) + ' ' + block.data.text + '\n\n';
+                        break;
+                    case 'paragraph':
+                        markdown += block.data.text + '\n\n';
+                        break;
+                    case 'list':
+                        for (const item of block.data.items) {
+                            markdown += (block.data.style === 'ordered' ? '1. ' : '- ') + item + '\n';
+                        }
+                        markdown += '\n';
+                        break;
+                    case 'quote':
+                        markdown += '> ' + block.data.text + '\n\n';
+                        break;
+                    case 'image':
+                        markdown += `![${block.data.caption}](${block.data.url})\n\n`;
+                        break;
+                    // Add more cases for other block types as needed
+                    default:
+                        console.warn(`Unsupported block type: ${block.type}`);
+                }
+            }
+            
+            return markdown.trim();
+        }
+
+        // Function to update the word count goal
+        function updateGoal() {
+            const goalInput = document.getElementById('goal-input');
+            wordCountGoal = parseInt(goalInput.value, 10);
+            document.getElementById('goal-count').textContent = `Goal: ${wordCountGoal}`;
+            localStorage.setItem('wordCountGoal', wordCountGoal);
+            updateFileInfo();
+        }
+
+        // Toggle help menu
+        function toggleHelpMenu() {
+            const helpMenu = document.getElementById('help-menu');
+            helpMenu.style.display = helpMenu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Add help button to toolbar
+        const toolbar = document.getElementById('toolbar');
+        const helpButton = document.createElement('button');
+        helpButton.innerHTML = '<i class="fas fa-question-circle"></i>';
+        helpButton.title = "Help (Ctrl+/)";
+        helpButton.onclick = toggleHelpMenu;
+        toolbar.appendChild(helpButton);
+
+        // Fix for close button
+        document.getElementById('close-help').addEventListener('click', toggleHelpMenu);
+
+        // Keyboard shortcut handling
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && !e.altKey && !e.shiftKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'b': e.preventDefault(); formatText('bold'); break;
+                    case 'i': e.preventDefault(); formatText('italic'); break;
+                    case 'u': e.preventDefault(); formatText('underline'); break;
+                    case 'o': e.preventDefault(); loadFile('main'); break;
+                    case 's': e.preventDefault(); saveFile('main'); break;
+                    case '/': e.preventDefault(); toggleHelpMenu(); break;
+                }
+            } else if (e.ctrlKey && e.shiftKey && !e.altKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'x': e.preventDefault(); switchCase(); break;
+                    case 'l': e.preventDefault(); addBullets(); break;
+                }
+            } else if (e.ctrlKey && e.altKey && !e.shiftKey) {
+                switch (e.key) {
+                    case '0': e.preventDefault(); changeStyle('paragraph'); break;
+                    case '1': e.preventDefault(); changeStyle('heading1'); break;
+                    case '2': e.preventDefault(); changeStyle('heading2'); break;
+                }
+            }
+        });
+
+        // Start screen functionality
+        document.getElementById('close-start-screen').addEventListener('click', function() {
+            document.getElementById('start-screen').style.display = 'none';
+        });
+
+        // Load saved goal and word count on startup
+        if (localStorage.getItem('wordCountGoal')) {
+            wordCountGoal = parseInt(localStorage.getItem('wordCountGoal'), 10);
+            document.getElementById('goal-input').value = wordCountGoal;
+            document.getElementById('goal-count').textContent = `Goal: ${wordCountGoal}`;
+        }
+
+        if (localStorage.getItem('dailyWordCount')) {
+            const savedWordCount = parseInt(localStorage.getItem('dailyWordCount'), 10);
+            document.getElementById('word-count').textContent = `${savedWordCount} words`;
+            updateProgressMeter(savedWordCount);
+        } else {
+            updateProgressMeter(0);
+        }
+
+        // Initial file info update
+        updateFileInfo();
+
+        // Initial update of the back button
+        updateBackButton();
+    </script>
+</body>
+</html>
