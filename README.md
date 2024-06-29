@@ -47,4 +47,4 @@ Save File: Ctrl+S
 Toggle Help Menu: Ctrl+/
 
 ## License
-Mokuton Editor is open-source software licensed under the MIT license.
+Mokuton Editor is open-source software licensed under the MIT license. Please enjoy it. I am not responsible for what you do with it, but I hope it's useful. 
