@@ -32,4 +32,5 @@ Mokuton Editor is open-source software licensed under the MIT license. Please en
 - allow export to more formats
 - polish those right sidebar elements a little
 
-  *Wood Release (木遁, Mokuton, Viz: Wood Style) is a nature transformation kekkei genkai, a combination of Earth and Water Release.[1] It was famously used by Hashirama Senju, and in fact is not known to have naturally occurred in anyone else, with the exception of the Ten-Tails, whose true form is the God Tree, leading to it being regarded as impossible to use without having his cells.[2] Because of Wood Release's power and versatility, there have been various efforts to reproduce it after Hashirama's death. Wood Release techniques are commonly affiliated with the Snake hand seal.* - https://naruto.fandom.com/wiki/Wood_Release
+## Name inspiration:
+*Wood Release (木遁, Mokuton, Viz: Wood Style) is a nature transformation kekkei genkai, a combination of Earth and Water Release.  It was famously used by Hashirama Senju, and in fact is not known to have naturally occurred in anyone else, with the exception of the Ten-Tails, whose true form is the God Tree, leading to it being regarded as impossible to use without having his cells. Because of Wood Release's power and versatility, there have been various efforts to reproduce it after Hashirama's death.* - https://naruto.fandom.com/wiki/Wood_Release
