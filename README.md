@@ -44,3 +44,4 @@ Mokuton Editor is open-source software licensed under the MIT license. Please en
 - Make the experience more WYSIWYG - check for inconsistencies when displaying font formatting in an opened markdown file
 - update the word count on file load
 - allow export to more formats
+- polish those right sidebar elements a little
