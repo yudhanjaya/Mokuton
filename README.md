@@ -18,9 +18,13 @@ Mokuton does exactly that. You open it in your browser and start writing: that's
 ## Usage
 
 File Management: Use the left sidebar to navigate your directories and open files.
+
 Writing: Click in the main editor area to start writing. Use the toolbar or keyboard shortcuts for formatting.
+
 Word Count Goal: Set your daily word count goal in the right sidebar and track your progress.
-Saving: Click the save button or use Ctrl+S to save your work as a Markdown file.
+
+
+
 
 ## License
 Mokuton Editor is open-source software licensed under the MIT license. Please enjoy it. I am not responsible for what you do with it, but I hope it's useful. 
