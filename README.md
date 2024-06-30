@@ -5,9 +5,6 @@ It combines modern aesthetics (a Medium-like interface, a block-style editor) wi
 
 ![Screenshot_mokuton](https://github.com/yudhanjaya/Mokuton/assets/16394240/c6c80a0e-ffe5-4bd3-bea3-e2ea1397becb)
 
-![Screenshot_mokuton_dark](https://github.com/yudhanjaya/Mokuton/assets/16394240/269ea3d1-44ac-47eb-b289-002f6156ffd9)
-
-The dark variant is less of a "dark mode" and more my take on a terminal-style experience. As you can see, elements have been moved around to make it so. 
 
 ## Rationale
 
@@ -27,6 +24,14 @@ File Management: Use the left sidebar to navigate your directories and open file
 Writing: Click in the main editor area to start writing. Use the toolbar or keyboard shortcuts for formatting.
 
 Word Count Goal: Set your daily word count goal in the right sidebar and track your progress.
+
+## Dark mode
+
+mokuton_dark.html is a variant.
+
+![Screenshot_mokuton_dark](https://github.com/yudhanjaya/Mokuton/assets/16394240/269ea3d1-44ac-47eb-b289-002f6156ffd9)
+
+This dark variant is less of a "dark mode" and more my take on a terminal-style experience. As you can see, elements have been moved around to make it so. 
 
 
 ## Acknowledgements
