@@ -1,6 +1,6 @@
 ## Mokuton is a simple and no-frills text editor. 
 
-It combines modern aesthetics (a Medium-like interface, a block-style editor) with broad compatibility. It's a single html file that runs on damn near anything, and gives you exactly what you need to write your story - and nothing else. No fonts to worry over. No lengthy packages or libraries to install and download. Just keep it in your browser and write.  It comes in two flavors: Light and Dark.
+It combines modern aesthetics (a Medium-like interface, a block-style editor) with broad compatibility. It's a single html file that runs on damn near anything, and gives you exactly what you need to write your story - and nothing else. No fonts to worry over. No lengthy packages or libraries to install and download. Just keep it in your browser and write.  
 
 
 ![Screenshot_mokuton](https://github.com/yudhanjaya/Mokuton/assets/16394240/c6c80a0e-ffe5-4bd3-bea3-e2ea1397becb)
