@@ -19,11 +19,8 @@ Mokuton does exactly that. You open it in your browser and start writing: that's
 
 ## Usage
 
-File Management: Use the left sidebar to navigate your directories and open files.
-
-Writing: Click in the main editor area to start writing. Use the toolbar or keyboard shortcuts for formatting.
-
-Word Count Goal: Set your daily word count goal in the right sidebar and track your progress.
+Download and open mokuton.html. Use the left sidebar to navigate your directories and open files.Click in the main editor area to start writing. Use the toolbar or keyboard shortcuts for formatting.
+Set your daily word count goal in the right sidebar and track your progress.
 
 ## Dark mode
 
