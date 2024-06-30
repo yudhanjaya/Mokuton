@@ -31,7 +31,7 @@ mokuton_dark.html is a variant. Use it if you want to feel like hackerman (if yo
 
 ![Screenshot_mokuton_dark](https://github.com/yudhanjaya/Mokuton/assets/16394240/269ea3d1-44ac-47eb-b289-002f6156ffd9)
 
-This dark variant is less of a "dark mode" and more my take on a terminal-style experience. As you can see, elements have been moved around to make it so. This may not be everyone's cup of tea. It has a "change theme" functionality that toggles between three colors for the text - green, amber, white(ish). 
+This dark variant is less of a "dark mode" and more my take on a terminal-style experience. As you can see, elements have been moved around to make it so. It has a "change theme" functionality that toggles between three colors for the text - green, amber, white(ish). This may not be everyone's cup of tea. 
 
 ## Acknowledgements
 Mokuton is built using Editor.js, Font Awesome for icons and Google Fonts for the fonts used. If you want to put together your own writing interface, I highly recommend Editor.js.
