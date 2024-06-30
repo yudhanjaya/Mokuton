@@ -24,7 +24,8 @@ Writing: Click in the main editor area to start writing. Use the toolbar or keyb
 Word Count Goal: Set your daily word count goal in the right sidebar and track your progress.
 
 
-
+## Acknowledgements
+Mokuton is built using Editor.js, Font Awesome for Icons and Google Fonts for the fonts used.
 
 ## License
 Mokuton Editor is open-source software licensed under the MIT license. Please enjoy it. I am not responsible for what you do with it, but I hope it's useful. 
