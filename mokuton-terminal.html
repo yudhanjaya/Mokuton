@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mokuton Terminal</title>
+    <!-- EditorJS and plugins with specific versions -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.22.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@2.6.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@1.6.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@2.8.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.6.0"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Terminal fonts: VT323 for a classic terminal look, Roboto Mono as fallback -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Terminal theme colors */
+        :root {
+            --terminal-bg: #0a0a0a;
+            --terminal-text: #33ff00;
+            --terminal-dim: #155c15;
+            --terminal-accent: #00dd00;
+            --terminal-border: #336633;
+            --terminal-panel: #111111;
+            --terminal-highlight: #1a3300;
+            --terminal-shadow: rgba(0, 255, 0, 0.15);
+            --terminal-dark: #0f1a0f;
+            --terminal-bright: #8bff8b;
+            --terminal-menu: #0f1f0f;
+            --terminal-scanline: rgba(0, 25, 0, 0.1);
+            --terminal-font: 'VT323', 'Roboto Mono', monospace;
+        }
+
+        /* Global styles */
+        * {
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: var(--terminal-accent) var(--terminal-bg);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--terminal-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--terminal-dim);
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--terminal-accent);
+        }
+
+        body {
+            font-family: var(--terminal-font);
+            margin: 0;
+            padding: 0;
+            background-color: var(--terminal-bg);
+            color: var(--terminal-text);
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* CRT effect overlay */
+        body::before {
+            content: "";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.1) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.2;
+        }
+
+        /* Scanline effect */
+        body::after {
+            content: "";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                var(--terminal-scanline),
+                var(--terminal-scanline) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.3;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            margin-left: 250px;
+            margin-right: 100px;
+            position: relative;
+        }
+
+        #toolbar {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--terminal-panel);
+            box-shadow: 0 0 10px var(--terminal-shadow);
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid var(--terminal-border);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        /* Terminal header bar with blinking light */
+        #toolbar::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--terminal-accent);
+            opacity: 0.7;
+        }
+
+        /* Blinking cursor in top-right corner */
+        #toolbar::after {
+            content: "";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 8px;
+            height: 12px;
+            background-color: var(--terminal-accent);
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .toolbar-buttons {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        #toolbar button, #toolbar select {
+            background-color: var(--terminal-dark);
+            border: 1px solid var(--terminal-dim);
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+            font-family: var(--terminal-font);
+            font-size: 16px;
+            transition: all 0.2s;
+            color: var(--terminal-text);
+            border-radius: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #toolbar button:hover, #toolbar select:hover {
+            background-color: var(--terminal-highlight);
+            border-color: var(--terminal-accent);
+            box-shadow: 0 0 8px var(--terminal-shadow);
+        }
+
+        #toolbar button:active {
+            background-color: var(--terminal-accent);
+            color: var(--terminal-bg);
+        }
+
+        #logo {
+            font-family: var(--terminal-font);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--terminal-accent);
+            margin-right: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: flicker 3s linear infinite;
+        }
+
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 94.999%, 97%, 100% {opacity: 1;}
+            20%, 21.999%, 63%, 63.999%, 95%, 96.999% {opacity: 0.8;}
+        }
+
+        #editorjs {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--terminal-bg);
+            box-shadow: 0 0 15px var(--terminal-shadow);
+            padding: 40px;
+            min-height: calc(100vh - 200px);
+            overflow-y: auto;
+            border: 1px solid var(--terminal-border);
+            font-family: var(--terminal-font);
+            font-size: 18px;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* Terminal style cursor for text editing */
+        .codex-editor__redactor .ce-block:focus-within::after {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 18px;
+            background-color: var(--terminal-accent);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 1px;
+        }
+
+        /* Override EditorJS text color */
+        .codex-editor, .ce-paragraph, .ce-header {
+            color: var(--terminal-text) !important;
+        }
+
+        /* Editor container corner styles */
+        #editorjs::before, #editorjs::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 1px solid var(--terminal-accent);
+        }
+
+        #editorjs::before {
+            top: 8px;
+            left: 8px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        #editorjs::after {
+            bottom: 8px;
+            right: 8px;
+            border-left: none;
+            border-top: none;
+        }
+
+        #left-sidebar {
+            width: 250px;
+            background-color: var(--terminal-dark);
+            color: var(--terminal-text);
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--terminal-border);
+            z-index: 10;
+        }
+
+        #left-sidebar h2 {
+            color: var(--terminal-accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0;
+            font-size: 20px;
+            border-bottom: 1px solid var(--terminal-dim);
+            padding-bottom: 8px;
+        }
+
+        #file-explorer {
+            list-style-type: none;
+            padding: 0;
+            font-size: 16px;
+        }
+
+        #file-explorer li {
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            margin-bottom: 2px;
+        }
+
+        #file-explorer li:hover {
+            background-color: var(--terminal-highlight);
+            border-left-color: var(--terminal-accent);
+        }
+
+        #right-sidebar {
+            width: 100px;
+            padding: 20px;
+            background-color: var(--terminal-dark);
+            border-left: 1px solid var(--terminal-border);
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+            right: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #progress-meter {
+            width: 60px;
+            height: 80%;
+            background-color: var(--terminal-bg);
+            border: 1px solid var(--terminal-dim);
+            overflow: hidden;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-auto-rows: 1fr;
+            gap: 1px;
+        }
+
+        .progress-box {
+            background-color: var(--terminal-bg);
+            transition: all 0.3s;
+            border: 1px solid var(--terminal-dark);
+        }
+
+        .progress-box.filled {
+            background-color: var(--terminal-accent);
+            box-shadow: 0 0 5px var(--terminal-accent);
+        }
+
+        #word-count, #goal-count {
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            color: var(--terminal-text);
+        }
+
+        #goal-input {
+            width: 80px;
+            margin-top: 10px;
+            text-align: center;
+            background-color: var(--terminal-bg);
+            border: 1px solid var(--terminal-dim);
+            color: var(--terminal-bright);
+            font-family: var(--terminal-font);
+            padding: 5px;
+        }
+
+        #goal-input:focus {
+            outline: none;
+            border-color: var(--terminal-accent);
+            box-shadow: 0 0 5px var(--terminal-shadow);
+        }
+
+        .style-select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .style-select-button {
+            background-color: var(--terminal-dark);
+            border: 1px solid var(--terminal-dim);
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+            font-family: var(--terminal-font);
+            font-size: 16px;
+            transition: all 0.2s;
+            color: var(--terminal-text);
+            border-radius: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+        }
+
+        .style-select-button:hover {
+            background-color: var(--terminal-highlight);
+            border-color: var(--terminal-accent);
+        }
+
+        .style-select-button::after {
+            content: '\25BC';
+            margin-left: 5px;
+            font-size: 10px;
+        }
+
+        .style-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--terminal-dark);
+            border: 1px solid var(--terminal-dim);
+            display: none;
+            z-index: 1000;
+            min-width: 150px;
+        }
+
+        .style-select-wrapper:hover .style-select-dropdown {
+            display: block;
+        }
+
+        .style-select-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            color: var(--terminal-text);
+        }
+
+        .style-select-option:hover {
+            background-color: var(--terminal-highlight);
+            color: var(--terminal-bright);
+        }
+
+        .style-select-option i {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+
+        #help-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--terminal-dark);
+            padding: 20px;
+            border: 1px solid var(--terminal-border);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7), 0 0 15px var(--terminal-shadow);
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+            font-family: var(--terminal-font);
+        }
+
+        #help-menu h2 {
+            color: var(--terminal-accent);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--terminal-dim);
+            padding-bottom: 5px;
+        }
+
+        #help-menu table {
+            width: 100%;
+            border-collapse: collapse;
+            color: var(--terminal-text);
+        }
+
+        #help-menu th, #help-menu td {
+            border: 1px solid var(--terminal-dim);
+            padding: 8px;
+            text-align: left;
+        }
+
+        #help-menu th {
+            background-color: var(--terminal-panel);
+            color: var(--terminal-bright);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #close-help {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--terminal-accent);
+        }
+
+        #select-directory, #back-button {
+            background-color: var(--terminal-dark);
+            color: var(--terminal-text);
+            border: 1px solid var(--terminal-dim);
+            padding: 8px 12px;
+            font-family: var(--terminal-font);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #select-directory:hover, #back-button:hover {
+            background-color: var(--terminal-highlight);
+            border-color: var(--terminal-accent);
+            box-shadow: 0 0 8px var(--terminal-shadow);
+        }
+
+        #select-directory:active, #back-button:active {
+            background-color: var(--terminal-accent);
+            color: var(--terminal-bg);
+        }
+
+        #select-directory i, #back-button i {
+            margin-right: 5px;
+        }
+
+        #back-button:disabled {
+            background-color: var(--terminal-bg);
+            border-color: var(--terminal-dark);
+            color: var(--terminal-dim);
+            cursor: not-allowed;
+        }
+
+        #file-info {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--terminal-dim);
+            font-family: var(--terminal-font);
+            border: 1px solid var(--terminal-border);
+            padding: 5px 10px;
+            background-color: var(--terminal-panel);
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #file-info::before {
+            content: "STATUS:";
+            color: var(--terminal-accent);
+            margin-right: 10px;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        #start-screen-content {
+            background-color: var(--terminal-dark);
+            padding: 40px;
+            border: 1px solid var(--terminal-border);
+            max-width: 600px;
+            text-align: center;
+            font-family: var(--terminal-font);
+            position: relative;
+            color: var(--terminal-text);
+            box-shadow: 0 0 30px var(--terminal-shadow);
+        }
+
+        /* Terminal corners for welcome screen */
+        #start-screen-content::before, #start-screen-content::after, 
+        #start-screen-content > div::before, #start-screen-content > div::after {
+            content: "";
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid var(--terminal-accent);
+        }
+
+        #start-screen-content::before {
+            top: 5px;
+            left: 5px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        #start-screen-content::after {
+            top: 5px;
+            right: 5px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        #start-screen-content > div::before {
+            bottom: 5px;
+            left: 5px;
+            border-right: none;
+            border-top: none;
+        }
+
+        #start-screen-content > div::after {
+            bottom: 5px;
+            right: 5px;
+            border-left: none;
+            border-top: none;
+        }
+
+        #start-screen h1 {
+            color: var(--terminal-accent);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: flicker 5s linear infinite;
+        }
+
+        #start-screen p {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        #start-screen ol {
+            text-align: left;
+            padding-left: 20px;
+            margin-bottom: 25px;
+        }
+
+        #start-screen li {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        #close-start-screen {
+            background-color: var(--terminal-dark);
+            color: var(--terminal-text);
+            border: 1px solid var(--terminal-dim);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: var(--terminal-font);
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        #close-start-screen:hover {
+            background-color: var(--terminal-highlight);
+            border-color: var(--terminal-accent);
+            color: var(--terminal-bright);
+            box-shadow: 0 0 15px var(--terminal-shadow);
+        }
+
+        #close-start-screen:active {
+            background-color: var(--terminal-accent);
+            color: var(--terminal-bg);
+        }
+
+        /* Terminal boot sequence overlay */
+        #boot-sequence {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--terminal-bg);
+            color: var(--terminal-text);
+            z-index: 3000;
+            font-family: var(--terminal-font);
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            animation: fadeOut 3s forwards;
+            animation-delay: 5s;
+        }
+
+        #boot-text {
+            white-space: pre-line;
+            font-size: 16px;
+            line-height: 1.3;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; z-index: 3000; }
+            99% { opacity: 0; z-index: 3000; }
+            100% { opacity: 0; z-index: -1; }
+        }
+
+        /* Typewriter effect for boot sequence */
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        .typing-line {
+            overflow: hidden;
+            white-space: nowrap;
+            margin-bottom: 5px;
+            animation: typing 1s steps(40, end);
+        }
+
+        @media (max-width: 1200px) {
+            body {
+                flex-direction: column;
+            }
+
+            .main-content {
+                margin-left: 0;
+                margin-right: 0;
+                padding-bottom: 60px;
+            }
+
+            #left-sidebar, #right-sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+
+            #right-sidebar {
+                flex-direction: row;
+                justify-content: center;
+                padding: 10px;
+            }
+
+            #progress-meter {
+                width: 80%;
+                height: 60px;
+                grid-template-columns: repeat(40, 1fr);
+                grid-template-rows: repeat(5, 1fr);
+                margin-top: 0;
+                margin-right: 10px;
+            }
+
+            #word-count, #goal-count, #goal-input {
+                margin-top: 0;
+                margin-left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Boot sequence overlay -->
+    <div id="boot-sequence">
+        <div id="boot-text"></div>
+    </div>
+
+    <div id="left-sidebar">
+        <h2>FILE EXPLORER</h2>
+        <button id="select-directory">
+            <i class="fas fa-folder-open"></i> Select Directory
+        </button>
+        <button id="back-button" disabled>
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <ul id="file-explorer"></ul>
+    </div>
+    <div class="main-content">
+        <div id="toolbar">
+            <div id="logo">Mokuton Terminal</div>
+            <div class="toolbar-buttons">
+                <button id="bold-button" title="Bold"><i class="fas fa-bold"></i></button>
+                <button id="italic-button" title="Italic"><i class="fas fa-italic"></i></button>
+                <button id="underline-button" title="Underline"><i class="fas fa-underline"></i></button>
+                <button id="case-button" title="Switch Case"><i class="fas fa-font"></i></button>
+                <div class="style-select-wrapper">
+                    <button class="style-select-button" title="Text Style">Paragraph</button>
+                    <div class="style-select-dropdown">
+                        <div class="style-select-option" id="paragraph-style">
+                            <i class="fas fa-paragraph"></i>Paragraph
+                        </div>
+                        <div class="style-select-option" id="heading1-style">
+                            <i class="fas fa-heading"></i>Heading 1
+                        </div>
+                        <div class="style-select-option" id="heading2-style">
+                            <i class="fas fa-heading" style="font-size: 0.9em;"></i>Heading 2
+                        </div>
+                    </div>
+                </div>
+                <button id="bullet-button" title="Bullets"><i class="fas fa-list-ul"></i></button>
+                <button id="load-button" title="Load Main"><i class="fas fa-file-upload"></i></button>
+                <button id="save-button" title="Save Main"><i class="fas fa-save"></i></button>
+            </div>
+        </div>
+        <div id="file-info">Untitled | Words: 0 | Pages: 0</div>
+        <div id="editorjs"></div>
+    </div>
+    <div id="right-sidebar">
+        <div id="progress-meter">
+            <!-- Progress boxes will be dynamically added here -->
+        </div>
+        <div id="word-count">0 words</div>
+        <div id="goal-count">Goal: 1000</div>
+        <input type="number" id="goal-input" value="1000" min="1">
+    </div>
+
+    <div id="help-menu">
+        <h2>Keyboard Shortcuts</h2>
+        <button id="close-help">&times;</button>
+        <table>
+            <tr>
+                <th>Action</th>
+                <th>Shortcut</th>
+            </tr>
+            <tr>
+                <td>Bold</td>
+                <td>Ctrl+B</td>
+            </tr>
+            <tr>
+                <td>Italic</td>
+                <td>Ctrl+I</td>
+            </tr>
+            <tr>
+                <td>Underline</td>
+                <td>Ctrl+U</td>
+            </tr>
+            <tr>
+                <td>Switch Case</td>
+                <td>Ctrl+Shift+X</td>
+            </tr>
+            <tr>
+                <td>Bullet List</td>
+                <td>Ctrl+Shift+L</td>
+            </tr>
+            <tr>
+                <td>Paragraph Style</td>
+                <td>Ctrl+Alt+0</td>
+            </tr>
+            <tr>
+                <td>Heading 1</td>
+                <td>Ctrl+Alt+1</td>
+            </tr>
+            <tr>
+                <td>Heading 2</td>
+                <td>Ctrl+Alt+2</td>
+            </tr>
+            <tr>
+                <td>Load Main</td>
+                <td>Ctrl+O</td>
+            </tr>
+            <tr>
+                <td>Save Main</td>
+                <td>Ctrl+S</td>
+            </tr>
+            <tr>
+                <td>Toggle Help Menu</td>
+                <td>Ctrl+/</td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="start-screen">
+        <div id="start-screen-content">
+            <div></div>
+            <h1>Welcome to Mokuton Terminal</h1>
+            <p>A powerful text editor inspired by classic computer terminals</p>
+            <p>To get started:</p>
+            <ol style="text-align: left;">
+                <li>Use the left sidebar to navigate your file system</li>
+                <li>Write your content in the main terminal window</li>
+                <li>Set your daily word count goal in the right panel</li>
+                <li>Track your writing progress with the LED grid meter</li>
+                <li>Use the command buttons for text formatting</li>
+            </ol>
+            <p>Begin your writing session now...</p>
+            <button id="close-start-screen">Initialize</button>
+        </div>
+    </div>
+
+    <script>
+        // Make sure we wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Boot sequence animation
+            const bootSequence = document.getElementById('boot-sequence');
+            const bootText = document.getElementById('boot-text');
+            const bootLines = [
+                "MOKUTON TERMINAL OS v3.7.2",
+                "Copyright (c) 2025 Wijeratne CyberWare Inc",
+                "",
+                "Initializing system...",
+                "Checking hardware...",
+                "CPU: OK",
+                "Memory: 64MB OK",
+                "Storage: 500MB OK",
+                "",
+                "Loading text processing kernel...",
+                "Loading display drivers...",
+                "Loading file system...",
+                "",
+                "System ready.",
+                "Initializing Mokuton Terminal interface...",
+                "",
+                "Welcome to Mokuton Terminal."
+            ];
+
+            let lineIndex = 0;
+            const typeNextLine = () => {
+                if (lineIndex < bootLines.length) {
+                    const line = document.createElement('div');
+                    line.className = 'typing-line';
+                    line.textContent = bootLines[lineIndex];
+                    bootText.appendChild(line);
+                    lineIndex++;
+                    setTimeout(typeNextLine, 300);
+                }
+            };
+            typeNextLine();
+
+            // Core variables
+            let currentFileName = "Untitled";
+            let wordCountGoal = 1000;
+            let directoryHistory = [];
+            let currentDirectoryIndex = -1;
+            let editor; // Declare editor at a higher scope
+
+            // Start screen functionality - Fix for the popup issue
+            const startScreen = document.getElementById('start-screen');
+            const closeStartScreenBtn = document.getElementById('close-start-screen');
+            
+            closeStartScreenBtn.addEventListener('click', function() {
+                startScreen.style.display = 'none';
+            });
+
+            // Fallback to close start screen if button doesn't work
+            setTimeout(function() {
+                if (startScreen && startScreen.style.display !== 'none') {
+                    console.log("Auto-closing start screen after timeout");
+                    startScreen.style.display = 'none';
+                }
+            }, 5000); // 5 second fallback
+
+            // Initialize Editor.js with proper error handling
+            try {
+                editor = new EditorJS({
+                    holder: 'editorjs',
+                    tools: {
+                        header: {
+                            class: window.Header,
+                            config: {
+                                levels: [1, 2, 3],
+                                defaultLevel: 2
+                            }
+                        },
+                        list: {
+                            class: window.List,
+                            inlineToolbar: true
+                        },
+                        paragraph: {
+                            class: window.Paragraph,
+                            inlineToolbar: true,
+                            config: {
+                                placeholder: 'Terminal ready for input...'
+                            }
+                        },
+                        quote: {
+                            class: window.Quote,
+                            inlineToolbar: true
+                        },
+                        image: window.Image
+                    },
+                    data: {
+                        blocks: [
+                            {
+                                type: "paragraph",
+                                data: {
+                                    text: "Terminal ready for input..."
+                                }
+                            }
+                        ]
+                    },
+                    onReady: () => {
+                        console.log('Editor.js is ready to work!');
+                        updateFileInfo();
+                    },
+                    onChange: () => {
+                        editor.save().then((outputData) => {
+                            localStorage.setItem('editorjsData', JSON.stringify(outputData));
+                            updateFileInfo();
+                        });
+                    }
+                });
+            } catch (err) {
+                console.error('EditorJS initialization error:', err);
+                document.getElementById('editorjs').innerHTML = 
+                    '<div style="padding: 20px; color: var(--terminal-accent);">SYSTEM ERROR: Editor failed to load: ' + err.message + '</div>';
+            }
+// Function to update file info
+function updateFileInfo() {
+    if (!editor) return;
+    
+    editor.save().then((outputData) => {
+        const wordCount = outputData.blocks.reduce((count, block) => {
+            return count + (block.data.text ? block.data.text.split(/\s+/).filter(word => word.length > 0).length : 0);
+        }, 0);
+        const pageCount = Math.ceil(wordCount / 250);
+        
+        const fileInfo = document.getElementById('file-info');
+        fileInfo.textContent = `${currentFileName} | Words: ${wordCount} | Pages: ${pageCount}`;
+
+        // Update word count display
+        document.getElementById('word-count').textContent = `${wordCount} words`;
+
+        // Update progress meter
+        updateProgressMeter(wordCount);
+
+        // Save word count to localStorage
+        localStorage.setItem('dailyWordCount', wordCount);
+    }).catch(err => {
+        console.error('Error saving editor data:', err);
+    });
+}
+
+// Function to create and update the progress meter
+function updateProgressMeter(wordCount) {
+    const progressMeter = document.getElementById('progress-meter');
+    const totalBoxes = 200; // 5 columns x 40 rows
+    const filledBoxes = Math.min(Math.floor((wordCount / wordCountGoal) * totalBoxes), totalBoxes);
+
+    // Clear existing boxes
+    progressMeter.innerHTML = '';
+
+    // Create new boxes
+    for (let i = 0; i < totalBoxes; i++) {
+        const box = document.createElement('div');
+        box.className = 'progress-box';
+        if (i < filledBoxes) {
+            box.classList.add('filled');
+        }
+        progressMeter.appendChild(box);
+    }
+}
+
+// New EditorJS compatible formatting functions
+function applyFormatting(format) {
+    if (!editor) return;
+    
+    // Note: This is a simplified approach. To fully implement formatting,
+    // you would need to use EditorJS API methods or create custom inline tools
+    console.log(`Attempting to apply formatting: ${format}`);
+}
+
+// Connect toolbar buttons with EditorJS actions
+document.getElementById('bold-button').addEventListener('click', () => applyFormatting('bold'));
+document.getElementById('italic-button').addEventListener('click', () => applyFormatting('italic'));
+document.getElementById('underline-button').addEventListener('click', () => applyFormatting('underline'));
+document.getElementById('case-button').addEventListener('click', () => applyFormatting('case'));
+document.getElementById('bullet-button').addEventListener('click', () => {
+    if (!editor) return;
+    
+    // Add a new list block
+    editor.blocks.insert('list', {
+        style: 'unordered',
+        items: ['New list item']
+    });
+});
+
+// Style selection
+document.getElementById('paragraph-style').addEventListener('click', () => {
+    if (!editor) return;
+    
+    // Change current block to paragraph
+    const currentIndex = editor.blocks.getCurrentBlockIndex();
+    editor.blocks.insert('paragraph');
+    document.querySelector('.style-select-button').textContent = 'Paragraph';
+});
+
+document.getElementById('heading1-style').addEventListener('click', () => {
+    if (!editor) return;
+    
+    // Change current block to h1
+    editor.blocks.insert('header', {
+        level: 1,
+        text: 'Heading 1'
+    });
+    document.querySelector('.style-select-button').textContent = 'Heading 1';
+});
+
+document.getElementById('heading2-style').addEventListener('click', () => {
+    if (!editor) return;
+    
+    // Change current block to h2
+    editor.blocks.insert('header', {
+        level: 2,
+        text: 'Heading 2'
+    });
+    document.querySelector('.style-select-button').textContent = 'Heading 2';
+});
+
+// Function to load file content into the editor
+function loadFileContent(content, fileName) {
+    if (!editor) return;
+    
+    try {
+        // Try to parse the content as JSON
+        const jsonContent = JSON.parse(content);
+        
+        // Make sure the JSON structure matches EditorJS expectations
+        if (!jsonContent.blocks) {
+            throw new Error("Invalid EditorJS data format");
+        }
+        
+        editor.render(jsonContent);
+    } catch (error) {
+        console.log('Loading as plain text');
+        // If parsing as JSON fails, treat it as plain text
+        const blocks = content.split('\n')
+            .filter(line => line.trim() !== '')
+            .map(line => ({
+                type: 'paragraph',
+                data: {
+                    text: line.trim()
+                }
+            }));
+        
+        editor.render({
+            blocks: blocks,
+            time: Date.now(),
+            version: '2.22.2'
+        });
+    }
+    currentFileName = fileName;
+    updateFileInfo();
+}
+
+// Function to select directory and populate file explorer
+async function selectDirectory() {
+    try {
+        const directoryHandle = await window.showDirectoryPicker();
+        directoryHistory = [directoryHandle];
+        currentDirectoryIndex = 0;
+        await populateFileExplorer(directoryHandle);
+        updateBackButton();
+    } catch (error) {
+        console.error('Error selecting directory:', error);
+    }
+}
+
+// Function to populate file explorer with natural sorting
+async function populateFileExplorer(directoryHandle) {
+    try {
+        const fileExplorer = document.getElementById('file-explorer');
+        // Clear existing files
+        fileExplorer.innerHTML = '';
+
+        const entries = [];
+        for await (const entry of directoryHandle.values()) {
+            entries.push(entry);
+        }
+
+        // Sort entries using natural sort order
+        entries.sort((a, b) => naturalCompare(a.name, b.name));
+
+        for (const entry of entries) {
+            const li = document.createElement('li');
+            if (entry.kind === 'file') {
+                li.textContent = entry.name;
+                li.onclick = async () => {
+                    try {
+                        const file = await entry.getFile();
+                        const content = await file.text();
+                        loadFileContent(content, entry.name);
+                    } catch (error) {
+                        console.error('Error loading file:', error);
+                    }
+                };
+            } else if (entry.kind === 'directory') {
+                li.textContent = `📁 ${entry.name}`;
+                li.onclick = async () => {
+                    try {
+                        const subDirectoryHandle = await directoryHandle.getDirectoryHandle(entry.name);
+                        directoryHistory = directoryHistory.slice(0, currentDirectoryIndex + 1);
+                        directoryHistory.push(subDirectoryHandle);
+                        currentDirectoryIndex++;
+                        await populateFileExplorer(subDirectoryHandle);
+                        updateBackButton();
+                    } catch (error) {
+                        console.error('Error opening subdirectory:', error);
+                    }
+                };
+            }
+            fileExplorer.appendChild(li);
+        }
+    } catch (error) {
+        console.error('Error populating file explorer:', error);
+    }
+}
+
+// Natural sort comparison function
+function naturalCompare(a, b) {
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+}
+
+// Function to navigate back to the previous directory
+async function navigateBack() {
+    if (currentDirectoryIndex > 0) {
+        currentDirectoryIndex--;
+        const previousDirectory = directoryHistory[currentDirectoryIndex];
+        await populateFileExplorer(previousDirectory);
+        updateBackButton();
+    }
+}
+
+// Function to update the state of the back button
+function updateBackButton() {
+    const backButton = document.getElementById('back-button');
+    backButton.disabled = currentDirectoryIndex <= 0;
+}
+
+// Function to load file
+document.getElementById('load-button').addEventListener('click', async function() {
+    try {
+        const [fileHandle] = await window.showOpenFilePicker();
+        const file = await fileHandle.getFile();
+        const content = await file.text();
+        loadFileContent(content, file.name);
+    } catch (error) {
+        console.error('Error loading file:', error);
+    }
+});
+
+// Function to save file
+document.getElementById('save-button').addEventListener('click', async function() {
+    if (!editor) return;
+    
+    try {
+        const options = {
+            types: [
+                {
+                    description: 'Markdown Files',
+                    accept: {'text/markdown': ['.md']},
+                },
+            ],
+        };
+        const fileHandle = await window.showSaveFilePicker(options);
+        const writable = await fileHandle.createWritable();
+        
+        const editorContent = await editor.save();
+        const content = convertToMarkdown(editorContent);
+        
+        await writable.write(content);
+        await writable.close();
+    } catch (error) {
+        console.error('Error saving file:', error);
+    }
+});
+
+// Function to convert Editor.js content to Markdown
+function convertToMarkdown(editorData) {
+    let markdown = '';
+    
+    for (const block of editorData.blocks) {
+        switch (block.type) {
+            case 'header':
+                markdown += '#'.repeat(block.data.level) + ' ' + block.data.text + '\n\n';
+                break;
+            case 'paragraph':
+                markdown += block.data.text + '\n\n';
+                break;
+            case 'list':
+                for (const item of block.data.items) {
+                    markdown += (block.data.style === 'ordered' ? '1. ' : '- ') + item + '\n';
+                }
+                markdown += '\n';
+                break;
+            case 'quote':
+                markdown += '> ' + block.data.text + '\n\n';
+                break;
+            case 'image':
+                markdown += `![${block.data.caption || 'image'}](${block.data.url})\n\n`;
+                break;
+            default:
+                console.warn(`Unsupported block type: ${block.type}`);
+        }
+    }
+    
+    return markdown.trim();
+}
+
+// Function to update the word count goal
+function updateGoal() {
+    const goalInput = document.getElementById('goal-input');
+    wordCountGoal = parseInt(goalInput.value, 10);
+    document.getElementById('goal-count').textContent = `Goal: ${wordCountGoal}`;
+    localStorage.setItem('wordCountGoal', wordCountGoal);
+    updateFileInfo();
+}
+
+// Toggle help menu
+function toggleHelpMenu() {
+    const helpMenu = document.getElementById('help-menu');
+    helpMenu.style.display = helpMenu.style.display === 'none' ? 'block' : 'none';
+}
+
+// Add help button to toolbar
+const toolbar = document.getElementById('toolbar');
+const helpButton = document.createElement('button');
+helpButton.innerHTML = '<i class="fas fa-question-circle"></i>';
+helpButton.title = "Help (Ctrl+/)";
+helpButton.onclick = toggleHelpMenu;
+toolbar.appendChild(helpButton);
+
+// Fix for close button
+document.getElementById('close-help').addEventListener('click', toggleHelpMenu);
+
+// Keyboard shortcut handling
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && !e.altKey && !e.shiftKey) {
+        switch (e.key.toLowerCase()) {
+            case 'b': e.preventDefault(); document.getElementById('bold-button').click(); break;
+            case 'i': e.preventDefault(); document.getElementById('italic-button').click(); break;
+            case 'u': e.preventDefault(); document.getElementById('underline-button').click(); break;
+            case 'o': e.preventDefault(); document.getElementById('load-button').click(); break;
+            case 's': e.preventDefault(); document.getElementById('save-button').click(); break;
+            case '/': e.preventDefault(); toggleHelpMenu(); break;
+        }
+    } else if (e.ctrlKey && e.shiftKey && !e.altKey) {
+        switch (e.key.toLowerCase()) {
+            case 'x': e.preventDefault(); document.getElementById('case-button').click(); break;
+            case 'l': e.preventDefault(); document.getElementById('bullet-button').click(); break;
+        }
+    } else if (e.ctrlKey && e.altKey && !e.shiftKey) {
+        switch (e.key) {
+            case '0': e.preventDefault(); document.getElementById('paragraph-style').click(); break;
+            case '1': e.preventDefault(); document.getElementById('heading1-style').click(); break;
+            case '2': e.preventDefault(); document.getElementById('heading2-style').click(); break;
+        }
+    }
+});
+
+// Load saved goal and word count on startup
+if (localStorage.getItem('wordCountGoal')) {
+    wordCountGoal = parseInt(localStorage.getItem('wordCountGoal'), 10);
+    document.getElementById('goal-input').value = wordCountGoal;
+    document.getElementById('goal-count').textContent = `Goal: ${wordCountGoal}`;
+}
+
+if (localStorage.getItem('dailyWordCount')) {
+    const savedWordCount = parseInt(localStorage.getItem('dailyWordCount'), 10);
+    document.getElementById('word-count').textContent = `${savedWordCount} words`;
+    updateProgressMeter(savedWordCount);
+} else {
+    updateProgressMeter(0);
+}
+
+// Make the directory select and back buttons functional
+document.getElementById('select-directory').onclick = selectDirectory;
+document.getElementById('back-button').onclick = navigateBack;
+
+// Initialize goal input
+document.getElementById('goal-input').onchange = updateGoal;
+
+// Initial update of the back button
+updateBackButton();
+
+// Export functions to window for inline handlers
+window.updateGoal = updateGoal;
+window.toggleHelpMenu = toggleHelpMenu;
+window.selectDirectory = selectDirectory;
+window.navigateBack = navigateBack;
+
+});
+</script>
+</body>
+</html>
