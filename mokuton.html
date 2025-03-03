@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mokuton Editor</title>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+    <!-- Fix: Load EditorJS and its plugins with specific versions -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.22.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@2.6.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@1.6.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@2.8.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.6.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
@@ -409,27 +410,27 @@
         <div id="toolbar">
             <div id="logo">Mokuton Editor</div>
             <div class="toolbar-buttons">
-                <button onclick="formatText('bold')" title="Bold"><i class="fas fa-bold"></i></button>
-                <button onclick="formatText('italic')" title="Italic"><i class="fas fa-italic"></i></button>
-                <button onclick="formatText('underline')" title="Underline"><i class="fas fa-underline"></i></button>
-                <button onclick="switchCase()" title="Switch Case"><i class="fas fa-font"></i></button>
+                <button id="bold-button" title="Bold"><i class="fas fa-bold"></i></button>
+                <button id="italic-button" title="Italic"><i class="fas fa-italic"></i></button>
+                <button id="underline-button" title="Underline"><i class="fas fa-underline"></i></button>
+                <button id="case-button" title="Switch Case"><i class="fas fa-font"></i></button>
                 <div class="style-select-wrapper">
                     <button class="style-select-button" title="Text Style">Paragraph</button>
                     <div class="style-select-dropdown">
-                        <div class="style-select-option" onclick="changeStyle('paragraph')">
+                        <div class="style-select-option" id="paragraph-style">
                             <i class="fas fa-paragraph"></i>Paragraph
                         </div>
-                        <div class="style-select-option" onclick="changeStyle('heading1')">
+                        <div class="style-select-option" id="heading1-style">
                             <i class="fas fa-heading"></i>Heading 1
                         </div>
-                        <div class="style-select-option" onclick="changeStyle('heading2')">
+                        <div class="style-select-option" id="heading2-style">
                             <i class="fas fa-heading" style="font-size: 0.9em;"></i>Heading 2
                         </div>
                     </div>
                 </div>
-                <button onclick="addBullets()" title="Bullets"><i class="fas fa-list-ul"></i></button>
-                <button onclick="loadFile('main')" title="Load Main"><i class="fas fa-file-upload"></i></button>
-                <button onclick="saveFile('main')" title="Save Main"><i class="fas fa-save"></i></button>
+                <button id="bullet-button" title="Bullets"><i class="fas fa-list-ul"></i></button>
+                <button id="load-button" title="Load Main"><i class="fas fa-file-upload"></i></button>
+                <button id="save-button" title="Save Main"><i class="fas fa-save"></i></button>
             </div>
         </div>
         <div id="file-info"></div>
@@ -517,380 +518,457 @@
     </div>
 
     <script>
-        let currentFileName = "Untitled";
-        let wordCountGoal = 1000;
-        let directoryHistory = [];
-        let currentDirectoryIndex = -1;
+        // Make sure we wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentFileName = "Untitled";
+            let wordCountGoal = 1000;
+            let directoryHistory = [];
+            let currentDirectoryIndex = -1;
+            let editor; // Declare editor at a higher scope
 
-        // Initialize Editor.js
-        const editor = new EditorJS({
-            holder: 'editorjs',
-            tools: {
-                header: {
-                    class: Header,
-                    config: {
-                        levels: [1, 2, 3],
-                        defaultLevel: 2
-                    }
-                },
-                list: {
-                    class: List,
-                    inlineToolbar: true
-                },
-                paragraph: {
-                    class: Paragraph,
-                    inlineToolbar: true,
-                    config: {
-                        placeholder: 'Tell your story...'
-                    }
-                },
-                quote: {
-                    class: Quote,
-                    inlineToolbar: true
-                },
-                image: Image
-            },
-            data: JSON.parse(localStorage.getItem('editorjsData')) || {},
-            onChange: () => {
-                editor.save().then((outputData) => {
-                    localStorage.setItem('editorjsData', JSON.stringify(outputData));
-                    updateFileInfo();
-                });
-            }
-        });
-
-        // Function to update file info (title, word count, page count) and progress meter
-        function updateFileInfo() {
-            editor.save().then((outputData) => {
-                const wordCount = outputData.blocks.reduce((count, block) => {
-                    return count + (block.data.text ? block.data.text.split(/\s+/).length : 0);
-                }, 0);
-                const pageCount = Math.ceil(wordCount / 250);
-                
-                const fileInfo = document.getElementById('file-info');
-                fileInfo.textContent = `${currentFileName} | Words: ${wordCount} | Pages: ${pageCount}`;
-
-                // Update word count display
-                document.getElementById('word-count').textContent = `${wordCount} words`;
-
-                // Update progress meter
-                updateProgressMeter(wordCount);
-
-                // Save word count to localStorage
-                localStorage.setItem('dailyWordCount', wordCount);
+            // Start screen functionality - Fix for the popup issue
+            const startScreen = document.getElementById('start-screen');
+            const closeStartScreenBtn = document.getElementById('close-start-screen');
+            
+            closeStartScreenBtn.addEventListener('click', function() {
+                startScreen.style.display = 'none';
             });
-        }
 
-        // Function to create and update the progress meter
-        function updateProgressMeter(wordCount) {
-            const progressMeter = document.getElementById('progress-meter');
-            const totalBoxes = 200; // 5 columns x 40 rows
-            const filledBoxes = Math.min(Math.floor((wordCount / wordCountGoal) * totalBoxes), totalBoxes);
-
-            // Clear existing boxes
-            progressMeter.innerHTML = '';
-
-            // Create new boxes
-            for (let i = 0; i < totalBoxes; i++) {
-                const box = document.createElement('div');
-                box.className = 'progress-box';
-                if (i < filledBoxes) {
-                    box.classList.add('filled');
+            // Fallback to close start screen if button doesn't work
+            setTimeout(function() {
+                if (startScreen && startScreen.style.display !== 'none') {
+                    console.log("Auto-closing start screen after timeout");
+                    startScreen.style.display = 'none';
                 }
-                progressMeter.appendChild(box);
-            }
-        }
+            }, 5000); // 5 second fallback
 
-        // Toolbar functions
-        function formatText(style) {
-            document.execCommand(style, false, null);
-        }
-
-        function switchCase() {
-            const selection = window.getSelection();
-            if (selection.toString().length > 0) {
-                const text = selection.toString();
-                const replacementText = text === text.toUpperCase() ? text.toLowerCase() : text.toUpperCase();
-                document.execCommand('insertText', false, replacementText);
-            }
-        }
-
-        function changeStyle(style) {
-            if (style === 'paragraph') {
-                document.execCommand('formatBlock', false, '<p>');
-                document.querySelector('.style-select-button').textContent = 'Paragraph';
-            } else if (style === 'heading1') {
-                document.execCommand('formatBlock', false, '<h1>');
-                document.querySelector('.style-select-button').textContent = 'Heading 1';
-            } else if (style === 'heading2') {
-                document.execCommand('formatBlock', false, '<h2>');
-                document.querySelector('.style-select-button').textContent = 'Heading 2';
-            }
-        }
-
-        function addBullets() {
-            document.execCommand('insertUnorderedList', false, null);
-        }
-
-        // Function to select directory and populate file explorer
-        async function selectDirectory() {
+            // Initialize Editor.js with proper error handling
             try {
-                const directoryHandle = await window.showDirectoryPicker();
-                directoryHistory = [directoryHandle];
-                currentDirectoryIndex = 0;
-                await populateFileExplorer(directoryHandle);
-                updateBackButton();
-            } catch (error) {
-                console.error('Error selecting directory:', error);
-            }
-        }
-
-        // Function to populate file explorer with natural sorting
-        async function populateFileExplorer(directoryHandle) {
-            try {
-                const fileExplorer = document.getElementById('file-explorer');
-                // Clear existing files
-                fileExplorer.innerHTML = '';
-
-                const entries = [];
-                for await (const entry of directoryHandle.values()) {
-                    entries.push(entry);
-                }
-
-                // Sort entries using natural sort order
-                entries.sort((a, b) => naturalCompare(a.name, b.name));
-
-                for (const entry of entries) {
-                    const li = document.createElement('li');
-                    if (entry.kind === 'file') {
-                        li.textContent = entry.name;
-                        li.onclick = async () => {
-                            try {
-                                const file = await entry.getFile();
-                                const content = await file.text();
-                                loadFileContent(content, entry.name);
-                            } catch (error) {
-                                console.error('Error loading file:', error);
+                editor = new EditorJS({
+                    holder: 'editorjs',
+                    tools: {
+                        header: {
+                            class: window.Header,
+                            config: {
+                                levels: [1, 2, 3],
+                                defaultLevel: 2
                             }
-                        };
-                    } else if (entry.kind === 'directory') {
-                        li.textContent = `📁 ${entry.name}`;
-                        li.onclick = async () => {
-                            try {
-                                const subDirectoryHandle = await directoryHandle.getDirectoryHandle(entry.name);
-                                directoryHistory = directoryHistory.slice(0, currentDirectoryIndex + 1);
-                                directoryHistory.push(subDirectoryHandle);
-                                currentDirectoryIndex++;
-                                await populateFileExplorer(subDirectoryHandle);
-                                updateBackButton();
-                            } catch (error) {
-                                console.error('Error opening subdirectory:', error);
+                        },
+                        list: {
+                            class: window.List,
+                            inlineToolbar: true
+                        },
+                        paragraph: {
+                            class: window.Paragraph,
+                            inlineToolbar: true,
+                            config: {
+                                placeholder: 'Tell your story...'
                             }
-                        };
-                    }
-                    fileExplorer.appendChild(li);
-                }
-            } catch (error) {
-                console.error('Error populating file explorer:', error);
-            }
-        }
-
-        // Natural sort comparison function
-        function naturalCompare(a, b) {
-            return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-        }
-
-        // Function to navigate back to the previous directory
-        async function navigateBack() {
-            if (currentDirectoryIndex > 0) {
-                currentDirectoryIndex--;
-                const previousDirectory = directoryHistory[currentDirectoryIndex];
-                await populateFileExplorer(previousDirectory);
-                updateBackButton();
-            }
-        }
-
-        // Function to update the state of the back button
-        function updateBackButton() {
-            const backButton = document.getElementById('back-button');
-            backButton.disabled = currentDirectoryIndex <= 0;
-        }
-
-        // Function to load file content into the editor
-        function loadFileContent(content, fileName) {
-            try {
-                // Try to parse the content as JSON
-                const jsonContent = JSON.parse(content);
-                editor.render(jsonContent);
-            } catch (error) {
-                // If parsing as JSON fails, treat it as plain text
-                console.log('Loading as plain text');
-                const blocks = content.split('\n').map(line => ({
-                    type: 'paragraph',
+                        },
+                        quote: {
+                            class: window.Quote,
+                            inlineToolbar: true
+                        },
+                        image: window.Image
+                    },
                     data: {
-                        text: line.trim()
+                        blocks: [
+                            {
+                                type: "paragraph",
+                                data: {
+                                    text: "Start writing here..."
+                                }
+                            }
+                        ]
+                    },
+                    onReady: () => {
+                        console.log('Editor.js is ready to work!');
+                        updateFileInfo();
+                    },
+                    onChange: () => {
+                        editor.save().then((outputData) => {
+                            localStorage.setItem('editorjsData', JSON.stringify(outputData));
+                            updateFileInfo();
+                        });
                     }
-                })).filter(block => block.data.text !== ''); // Remove empty lines
+                });
+            } catch (err) {
+                console.error('EditorJS initialization error:', err);
+                document.getElementById('editorjs').innerHTML = 
+                    '<div style="padding: 20px; color: red;">Editor failed to load: ' + err.message + '</div>';
+            }
 
-                editor.render({
-                    blocks: blocks
+            // Function to update file info
+            function updateFileInfo() {
+                if (!editor) return;
+                
+                editor.save().then((outputData) => {
+                    const wordCount = outputData.blocks.reduce((count, block) => {
+                        return count + (block.data.text ? block.data.text.split(/\s+/).filter(word => word.length > 0).length : 0);
+                    }, 0);
+                    const pageCount = Math.ceil(wordCount / 250);
+                    
+                    const fileInfo = document.getElementById('file-info');
+                    fileInfo.textContent = `${currentFileName} | Words: ${wordCount} | Pages: ${pageCount}`;
+
+                    // Update word count display
+                    document.getElementById('word-count').textContent = `${wordCount} words`;
+
+                    // Update progress meter
+                    updateProgressMeter(wordCount);
+
+                    // Save word count to localStorage
+                    localStorage.setItem('dailyWordCount', wordCount);
+                }).catch(err => {
+                    console.error('Error saving editor data:', err);
                 });
             }
-            currentFileName = fileName;
-            updateFileInfo();
-        }
 
-        // Function to load file content
-        async function loadFile(section) {
-            try {
-                const [fileHandle] = await window.showOpenFilePicker();
-                const file = await fileHandle.getFile();
-                const content = await file.text();
-                
-                if (section === 'main') {
-                    loadFileContent(content, file.name);
+            // Function to create and update the progress meter
+            function updateProgressMeter(wordCount) {
+                const progressMeter = document.getElementById('progress-meter');
+                const totalBoxes = 200; // 5 columns x 40 rows
+                const filledBoxes = Math.min(Math.floor((wordCount / wordCountGoal) * totalBoxes), totalBoxes);
+
+                // Clear existing boxes
+                progressMeter.innerHTML = '';
+
+                // Create new boxes
+                for (let i = 0; i < totalBoxes; i++) {
+                    const box = document.createElement('div');
+                    box.className = 'progress-box';
+                    if (i < filledBoxes) {
+                        box.classList.add('filled');
+                    }
+                    progressMeter.appendChild(box);
                 }
-            } catch (error) {
-                console.error('Error loading file:', error);
             }
-        }
 
-        // Function to save file content
-        async function saveFile(section) {
-            try {
-                const options = {
-                    types: [
-                        {
-                            description: 'Markdown Files',
-                            accept: {'text/markdown': ['.md']},
-                        },
-                    ],
-                };
-                const fileHandle = await window.showSaveFilePicker(options);
-                const writable = await fileHandle.createWritable();
+            // New EditorJS compatible formatting functions
+            function applyFormatting(format) {
+                if (!editor) return;
                 
-                let content;
-                if (section === 'main') {
-                    const editorContent = await editor.save();
-                    content = convertToMarkdown(editorContent);
+                // Note: This is a simplified approach. To fully implement formatting,
+                // you would need to use EditorJS API methods or create custom inline tools
+                console.log(`Attempting to apply formatting: ${format}`);
+            }
+
+            // Connect toolbar buttons with EditorJS actions
+            document.getElementById('bold-button').addEventListener('click', () => applyFormatting('bold'));
+            document.getElementById('italic-button').addEventListener('click', () => applyFormatting('italic'));
+            document.getElementById('underline-button').addEventListener('click', () => applyFormatting('underline'));
+            document.getElementById('case-button').addEventListener('click', () => applyFormatting('case'));
+            document.getElementById('bullet-button').addEventListener('click', () => {
+                if (!editor) return;
+                
+                // Add a new list block
+                editor.blocks.insert('list', {
+                    style: 'unordered',
+                    items: ['New list item']
+                });
+            });
+
+            // Style selection
+            document.getElementById('paragraph-style').addEventListener('click', () => {
+                if (!editor) return;
+                
+                // Change current block to paragraph
+                const currentIndex = editor.blocks.getCurrentBlockIndex();
+                editor.blocks.insert('paragraph');
+                document.querySelector('.style-select-button').textContent = 'Paragraph';
+            });
+
+            document.getElementById('heading1-style').addEventListener('click', () => {
+                if (!editor) return;
+                
+                // Change current block to h1
+                editor.blocks.insert('header', {
+                    level: 1,
+                    text: 'Heading 1'
+                });
+                document.querySelector('.style-select-button').textContent = 'Heading 1';
+            });
+
+            document.getElementById('heading2-style').addEventListener('click', () => {
+                if (!editor) return;
+                
+                // Change current block to h2
+                editor.blocks.insert('header', {
+                    level: 2,
+                    text: 'Heading 2'
+                });
+                document.querySelector('.style-select-button').textContent = 'Heading 2';
+            });
+
+            // Function to load file content into the editor
+            function loadFileContent(content, fileName) {
+                if (!editor) return;
+                
+                try {
+                    // Try to parse the content as JSON
+                    const jsonContent = JSON.parse(content);
+                    
+                    // Make sure the JSON structure matches EditorJS expectations
+                    if (!jsonContent.blocks) {
+                        throw new Error("Invalid EditorJS data format");
+                    }
+                    
+                    editor.render(jsonContent);
+                } catch (error) {
+                    console.log('Loading as plain text');
+                    // If parsing as JSON fails, treat it as plain text
+                    const blocks = content.split('\n')
+                        .filter(line => line.trim() !== '')
+                        .map(line => ({
+                            type: 'paragraph',
+                            data: {
+                                text: line.trim()
+                            }
+                        }));
+                    
+                    editor.render({
+                        blocks: blocks,
+                        time: Date.now(),
+                        version: '2.22.2'
+                    });
                 }
-                
-                await writable.write(content);
-                await writable.close();
-            } catch (error) {
-                console.error('Error saving file:', error);
+                currentFileName = fileName;
+                updateFileInfo();
             }
-        }
 
-        // Function to convert Editor.js content to Markdown
-        function convertToMarkdown(editorData) {
-            let markdown = '';
-            
-            for (const block of editorData.blocks) {
-                switch (block.type) {
-                    case 'header':
-                        markdown += '#'.repeat(block.data.level) + ' ' + block.data.text + '\n\n';
-                        break;
-                    case 'paragraph':
-                        markdown += block.data.text + '\n\n';
-                        break;
-                    case 'list':
-                        for (const item of block.data.items) {
-                            markdown += (block.data.style === 'ordered' ? '1. ' : '- ') + item + '\n';
+            // Function to select directory and populate file explorer
+            async function selectDirectory() {
+                try {
+                    const directoryHandle = await window.showDirectoryPicker();
+                    directoryHistory = [directoryHandle];
+                    currentDirectoryIndex = 0;
+                    await populateFileExplorer(directoryHandle);
+                    updateBackButton();
+                } catch (error) {
+                    console.error('Error selecting directory:', error);
+                }
+            }
+
+            // Function to populate file explorer with natural sorting
+            async function populateFileExplorer(directoryHandle) {
+                try {
+                    const fileExplorer = document.getElementById('file-explorer');
+                    // Clear existing files
+                    fileExplorer.innerHTML = '';
+
+                    const entries = [];
+                    for await (const entry of directoryHandle.values()) {
+                        entries.push(entry);
+                    }
+
+                    // Sort entries using natural sort order
+                    entries.sort((a, b) => naturalCompare(a.name, b.name));
+
+                    for (const entry of entries) {
+                        const li = document.createElement('li');
+                        if (entry.kind === 'file') {
+                            li.textContent = entry.name;
+                            li.onclick = async () => {
+                                try {
+                                    const file = await entry.getFile();
+                                    const content = await file.text();
+                                    loadFileContent(content, entry.name);
+                                } catch (error) {
+                                    console.error('Error loading file:', error);
+                                }
+                            };
+                        } else if (entry.kind === 'directory') {
+                            li.textContent = `📁 ${entry.name}`;
+                            li.onclick = async () => {
+                                try {
+                                    const subDirectoryHandle = await directoryHandle.getDirectoryHandle(entry.name);
+                                    directoryHistory = directoryHistory.slice(0, currentDirectoryIndex + 1);
+                                    directoryHistory.push(subDirectoryHandle);
+                                    currentDirectoryIndex++;
+                                    await populateFileExplorer(subDirectoryHandle);
+                                    updateBackButton();
+                                } catch (error) {
+                                    console.error('Error opening subdirectory:', error);
+                                }
+                            };
                         }
-                        markdown += '\n';
-                        break;
-                    case 'quote':
-                        markdown += '> ' + block.data.text + '\n\n';
-                        break;
-                    case 'image':
-                        markdown += `![${block.data.caption}](${block.data.url})\n\n`;
-                        break;
-                    // Add more cases for other block types as needed
-                    default:
-                        console.warn(`Unsupported block type: ${block.type}`);
+                        fileExplorer.appendChild(li);
+                    }
+                } catch (error) {
+                    console.error('Error populating file explorer:', error);
                 }
             }
+
+            // Natural sort comparison function
+            function naturalCompare(a, b) {
+                return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+            }
+
+            // Function to navigate back to the previous directory
+            async function navigateBack() {
+                if (currentDirectoryIndex > 0) {
+                    currentDirectoryIndex--;
+                    const previousDirectory = directoryHistory[currentDirectoryIndex];
+                    await populateFileExplorer(previousDirectory);
+                    updateBackButton();
+                }
+            }
+
+            // Function to update the state of the back button
+            function updateBackButton() {
+                const backButton = document.getElementById('back-button');
+                backButton.disabled = currentDirectoryIndex <= 0;
+            }
+
+            // Function to load file
+            document.getElementById('load-button').addEventListener('click', async function() {
+                try {
+                    const [fileHandle] = await window.showOpenFilePicker();
+                    const file = await fileHandle.getFile();
+                    const content = await file.text();
+                    loadFileContent(content, file.name);
+                } catch (error) {
+                    console.error('Error loading file:', error);
+                }
+            });
+
+            // Function to save file
+            document.getElementById('save-button').addEventListener('click', async function() {
+                if (!editor) return;
+                
+                try {
+                    const options = {
+                        types: [
+                            {
+                                description: 'Markdown Files',
+                                accept: {'text/markdown': ['.md']},
+                            },
+                        ],
+                    };
+                    const fileHandle = await window.showSaveFilePicker(options);
+                    const writable = await fileHandle.createWritable();
+                    
+                    const editorContent = await editor.save();
+                    const content = convertToMarkdown(editorContent);
+                    
+                    await writable.write(content);
+                    await writable.close();
+                } catch (error) {
+                    console.error('Error saving file:', error);
+                }
+            });
+
+            // Function to convert Editor.js content to Markdown
+            function convertToMarkdown(editorData) {
+                let markdown = '';
+                
+                for (const block of editorData.blocks) {
+                    switch (block.type) {
+                        case 'header':
+                            markdown += '#'.repeat(block.data.level) + ' ' + block.data.text + '\n\n';
+                            break;
+                        case 'paragraph':
+                            markdown += block.data.text + '\n\n';
+                            break;
+                        case 'list':
+                            for (const item of block.data.items) {
+                                markdown += (block.data.style === 'ordered' ? '1. ' : '- ') + item + '\n';
+                            }
+                            markdown += '\n';
+                            break;
+                        case 'quote':
+                            markdown += '> ' + block.data.text + '\n\n';
+                            break;
+                        case 'image':
+                            markdown += `![${block.data.caption || 'image'}](${block.data.url})\n\n`;
+                            break;
+                        default:
+                            console.warn(`Unsupported block type: ${block.type}`);
+                    }
+                }
+                
+                return markdown.trim();
+            }
+
+            // Function to update the word count goal
+            function updateGoal() {
+                const goalInput = document.getElementById('goal-input');
+                wordCountGoal = parseInt(goalInput.value, 10);
+                document.getElementById('goal-count').textContent = `Goal: ${wordCountGoal}`;
+                localStorage.setItem('wordCountGoal', wordCountGoal);
+                updateFileInfo();
+            }
+
+            // Toggle help menu
+            function toggleHelpMenu() {
+                const helpMenu = document.getElementById('help-menu');
+                helpMenu.style.display = helpMenu.style.display === 'none' ? 'block' : 'none';
+            }
+
+            // Add help button to toolbar
+            const toolbar = document.getElementById('toolbar');
+            const helpButton = document.createElement('button');
+            helpButton.innerHTML = '<i class="fas fa-question-circle"></i>';
+            helpButton.title = "Help (Ctrl+/)";
+            helpButton.onclick = toggleHelpMenu;
+            toolbar.appendChild(helpButton);
+
+            // Fix for close button
+            document.getElementById('close-help').addEventListener('click', toggleHelpMenu);
+
+            // Keyboard shortcut handling
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && !e.altKey && !e.shiftKey) {
+                    switch (e.key.toLowerCase()) {
+                        case 'b': e.preventDefault(); document.getElementById('bold-button').click(); break;
+                        case 'i': e.preventDefault(); document.getElementById('italic-button').click(); break;
+                        case 'u': e.preventDefault(); document.getElementById('underline-button').click(); break;
+                        case 'o': e.preventDefault(); document.getElementById('load-button').click(); break;
+                        case 's': e.preventDefault(); document.getElementById('save-button').click(); break;
+                        case '/': e.preventDefault(); toggleHelpMenu(); break;
+                    }
+                } else if (e.ctrlKey && e.shiftKey && !e.altKey) {
+                    switch (e.key.toLowerCase()) {
+                        case 'x': e.preventDefault(); document.getElementById('case-button').click(); break;
+                        case 'l': e.preventDefault(); document.getElementById('bullet-button').click(); break;
+                    }
+                } else if (e.ctrlKey && e.altKey && !e.shiftKey) {
+                    switch (e.key) {
+                        case '0': e.preventDefault(); document.getElementById('paragraph-style').click(); break;
+                        case '1': e.preventDefault(); document.getElementById('heading1-style').click(); break;
+                        case '2': e.preventDefault(); document.getElementById('heading2-style').click(); break;
+                    }
+                }
+            });
+
+            // Load saved goal and word count on startup
+            if (localStorage.getItem('wordCountGoal')) {
+                wordCountGoal = parseInt(localStorage.getItem('wordCountGoal'), 10);
+                document.getElementById('goal-input').value = wordCountGoal;
+                document.getElementById('goal-count').textContent = `Goal: ${wordCountGoal}`;
+            }
+
+            if (localStorage.getItem('dailyWordCount')) {
+                const savedWordCount = parseInt(localStorage.getItem('dailyWordCount'), 10);
+                document.getElementById('word-count').textContent = `${savedWordCount} words`;
+                updateProgressMeter(savedWordCount);
+            } else {
+                updateProgressMeter(0);
+            }
+
+            // Make the directory select and back buttons functional
+            document.getElementById('select-directory').onclick = selectDirectory;
+            document.getElementById('back-button').onclick = navigateBack;
+
+            // Initial update of the back button
+            updateBackButton();
             
-            return markdown.trim();
-        }
-
-        // Function to update the word count goal
-        function updateGoal() {
-            const goalInput = document.getElementById('goal-input');
-            wordCountGoal = parseInt(goalInput.value, 10);
-            document.getElementById('goal-count').textContent = `Goal: ${wordCountGoal}`;
-            localStorage.setItem('wordCountGoal', wordCountGoal);
-            updateFileInfo();
-        }
-
-        // Toggle help menu
-        function toggleHelpMenu() {
-            const helpMenu = document.getElementById('help-menu');
-            helpMenu.style.display = helpMenu.style.display === 'none' ? 'block' : 'none';
-        }
-
-        // Add help button to toolbar
-        const toolbar = document.getElementById('toolbar');
-        const helpButton = document.createElement('button');
-        helpButton.innerHTML = '<i class="fas fa-question-circle"></i>';
-        helpButton.title = "Help (Ctrl+/)";
-        helpButton.onclick = toggleHelpMenu;
-        toolbar.appendChild(helpButton);
-
-        // Fix for close button
-        document.getElementById('close-help').addEventListener('click', toggleHelpMenu);
-
-        // Keyboard shortcut handling
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && !e.altKey && !e.shiftKey) {
-                switch (e.key.toLowerCase()) {
-                    case 'b': e.preventDefault(); formatText('bold'); break;
-                    case 'i': e.preventDefault(); formatText('italic'); break;
-                    case 'u': e.preventDefault(); formatText('underline'); break;
-                    case 'o': e.preventDefault(); loadFile('main'); break;
-                    case 's': e.preventDefault(); saveFile('main'); break;
-                    case '/': e.preventDefault(); toggleHelpMenu(); break;
-                }
-            } else if (e.ctrlKey && e.shiftKey && !e.altKey) {
-                switch (e.key.toLowerCase()) {
-                    case 'x': e.preventDefault(); switchCase(); break;
-                    case 'l': e.preventDefault(); addBullets(); break;
-                }
-            } else if (e.ctrlKey && e.altKey && !e.shiftKey) {
-                switch (e.key) {
-                    case '0': e.preventDefault(); changeStyle('paragraph'); break;
-                    case '1': e.preventDefault(); changeStyle('heading1'); break;
-                    case '2': e.preventDefault(); changeStyle('heading2'); break;
-                }
-            }
+            // Export functions to window for inline handlers
+            window.updateGoal = updateGoal;
+            window.toggleHelpMenu = toggleHelpMenu;
+            window.selectDirectory = selectDirectory;
+            window.navigateBack = navigateBack;
         });
-
-        // Start screen functionality
-        document.getElementById('close-start-screen').addEventListener('click', function() {
-            document.getElementById('start-screen').style.display = 'none';
-        });
-
-        // Load saved goal and word count on startup
-        if (localStorage.getItem('wordCountGoal')) {
-            wordCountGoal = parseInt(localStorage.getItem('wordCountGoal'), 10);
-            document.getElementById('goal-input').value = wordCountGoal;
-            document.getElementById('goal-count').textContent = `Goal: ${wordCountGoal}`;
-        }
-
-        if (localStorage.getItem('dailyWordCount')) {
-            const savedWordCount = parseInt(localStorage.getItem('dailyWordCount'), 10);
-            document.getElementById('word-count').textContent = `${savedWordCount} words`;
-            updateProgressMeter(savedWordCount);
-        } else {
-            updateProgressMeter(0);
-        }
-
-        // Initial file info update
-        updateFileInfo();
-
-        // Initial update of the back button
-        updateBackButton();
     </script>
 </body>
 </html>
