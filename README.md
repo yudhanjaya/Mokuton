@@ -69,7 +69,8 @@ Mokuton Editor is open-source software licensed under the MIT license. Please en
 
 #### New terminal version, ft Claude
 
-- I let Claude entirely handle the terminal version. It added some cool touches to the terminal experience, including a retro BIOS-style loading screen. 
+- I let Claude entirely handle the terminal version. It added some cool touches to the terminal experience, including a retro BIOS-style loading screen.
+- I don't entirely like the glitchy "multiple blinking lights" cursory-things, but I assume that's a simple fix for later
 
 ## Name inspiration:
 *Wood Release (木遁, Mokuton, Viz: Wood Style) is a nature transformation kekkei genkai, a combination of Earth and Water Release.  It was famously used by Hashirama Senju, and in fact is not known to have naturally occurred in anyone else, with the exception of the Ten-Tails, whose true form is the God Tree, leading to it being regarded as impossible to use without having his cells. Because of Wood Release's power and versatility, there have been various efforts to reproduce it after Hashirama's death.* - https://naruto.fandom.com/wiki/Wood_Release
