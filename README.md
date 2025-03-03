@@ -38,12 +38,35 @@ Mokuton is built using Editor.js, Font Awesome for icons and Google Fonts for th
 ## License
 Mokuton Editor is open-source software licensed under the MIT license. Please enjoy it. I am not responsible for what you do with it, but I hope it's useful. 
 
-## To-do list
+## Changelog
+[1.1.0] - 2025-03-03
 
-- Make the experience more WYSIWYG - check for inconsistencies when displaying font formatting in an opened markdown file
-- update the word count on file load
-- allow export to more formats
-- polish those right sidebar elements a little
+### Fixed "List is not defined" error:
+
+- Changed the imports to use specific versions of the EditorJS plugins
+- Added proper namespacing (window.List instead of just List)
+- Improved error handling during initialization
+
+
+### Fixed the "Get Started" popup issue:
+
+- Fixed the event listener for the close button
+- Added a fallback 5-second auto-close timer
+- Wrapped the entire script in a DOMContentLoaded event to ensure elements exist
+
+
+### - Fixed EditorJS integration issues:
+
+- Rewrote toolbar buttons to use proper event listeners rather than inline onclick
+- Restructured formatting functions to work with EditorJS API instead of document.execCommand
+- Fixed the rendering logic for loading files
+
+### Improved error handling:
+
+- Added try/catch blocks in critical functions
+- Added fallbacks when operations fail
+- Added console logging to help with debugging
+
 
 ## Name inspiration:
 *Wood Release (木遁, Mokuton, Viz: Wood Style) is a nature transformation kekkei genkai, a combination of Earth and Water Release.  It was famously used by Hashirama Senju, and in fact is not known to have naturally occurred in anyone else, with the exception of the Ten-Tails, whose true form is the God Tree, leading to it being regarded as impossible to use without having his cells. Because of Wood Release's power and versatility, there have been various efforts to reproduce it after Hashirama's death.* - https://naruto.fandom.com/wiki/Wood_Release
