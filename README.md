@@ -24,13 +24,13 @@ Mokuton does exactly that. You open it in your browser and start writing: that's
  - Click in the main editor area to start writing.
  - Use the top toolbar for formatting; if you need to figure out keyboard shortcuts, click the help icon.
 
-## Dark mode
+## Mokuton Terminal
 
-mokuton_dark.html is a variant. Use it if you want to feel like hackerman (if you don't know what that is, it's a weird in-joke involving Mr. Robot and Kung Fury). Rest assured that no Java was involved.
+mokuton_terminal.html is an experimental variant. Use it if you want to feel like hackerman.
 
-![Screenshot_mokuton_dark](https://github.com/yudhanjaya/Mokuton/assets/16394240/269ea3d1-44ac-47eb-b289-002f6156ffd9)
+![Screenshot 2025-03-03 083744](https://github.com/user-attachments/assets/97120da5-e66f-437c-972f-cf7695f878e1)
 
-This dark variant is less of a "dark mode" and more my take on a terminal-style experience. As you can see, elements have been moved around to make it so. It has a "change theme" functionality that toggles between three colors for the text - green, amber, white(ish). This may not be everyone's cup of tea. 
+
 
 ## Acknowledgements
 Mokuton is built using Editor.js, Font Awesome for icons and Google Fonts for the fonts used. If you want to put together your own writing interface, I highly recommend Editor.js.
@@ -38,35 +38,38 @@ Mokuton is built using Editor.js, Font Awesome for icons and Google Fonts for th
 ## License
 Mokuton Editor is open-source software licensed under the MIT license. Please enjoy it. I am not responsible for what you do with it, but I hope it's useful. 
 
-## Changelog
-[1.1.0] - 2025-03-03
+## Changelog for [1.1.0] - 2025-03-03
 
-### Fixed "List is not defined" error:
+
+#### Fixed "List is not defined" error:
 
 - Changed the imports to use specific versions of the EditorJS plugins
 - Added proper namespacing (window.List instead of just List)
 - Improved error handling during initialization
 
 
-### Fixed the "Get Started" popup issue:
+#### Fixed the "Get Started" popup issue:
 
 - Fixed the event listener for the close button
 - Added a fallback 5-second auto-close timer
 - Wrapped the entire script in a DOMContentLoaded event to ensure elements exist
 
 
-### - Fixed EditorJS integration issues:
+#### - Fixed EditorJS integration issues:
 
 - Rewrote toolbar buttons to use proper event listeners rather than inline onclick
 - Restructured formatting functions to work with EditorJS API instead of document.execCommand
 - Fixed the rendering logic for loading files
 
-### Improved error handling:
+#### Improved error handling:
 
 - Added try/catch blocks in critical functions
 - Added fallbacks when operations fail
 - Added console logging to help with debugging
 
+#### New terminal version, ft Claude
+
+- I let Claude entirely handle the terminal version. It added some cool touches to the terminal experience, including a retro BIOS-style loading screen. 
 
 ## Name inspiration:
 *Wood Release (木遁, Mokuton, Viz: Wood Style) is a nature transformation kekkei genkai, a combination of Earth and Water Release.  It was famously used by Hashirama Senju, and in fact is not known to have naturally occurred in anyone else, with the exception of the Ten-Tails, whose true form is the God Tree, leading to it being regarded as impossible to use without having his cells. Because of Wood Release's power and versatility, there have been various efforts to reproduce it after Hashirama's death.* - https://naruto.fandom.com/wiki/Wood_Release
