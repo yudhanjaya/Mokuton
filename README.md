@@ -39,20 +39,20 @@ With the help of Gemini-CLI:
 
 1. Mokuton-terminal removed. Dark mode added to Mokuton instead. The choice is persistent.
 
-![Screenshot_110](https://github.com/user-attachments/assets/efb9da56-a9ea-474b-80cd-6e1da9a0532e)
+![Screenshot_2](https://github.com/user-attachments/assets/dd111b3b-ec2c-42e6-be81-33882fad1ef4)
 
 
-3. Work was saved to localStorage but never loaded back, meaning a refresh would clear the editor.Added an initialization check that restores the editor's state from localStorage on startup. Text will now stay in the browser even if you close the tab or lose power. This also means you can just reload to fix any UI issues. 
+2. Work was saved to localStorage but never loaded back, meaning a refresh would clear the editor.Added an initialization check that restores the editor's state from localStorage on startup. Text will now stay in the browser even if you close the tab or lose power. This also means you can just reload to fix any UI issues. 
 
-4. The progress meter was clearing and recreating 200 DOM elements on every keystroke, which would cause lag on low-power devices. The box grid is now created once at startup. typed words merely toggle a .filled class on existing elements.
+3. The progress meter was clearing and recreating 200 DOM elements on every keystroke, which would cause lag on low-power devices. The box grid is now created once at startup. typed words merely toggle a .filled class on existing elements.
 
-5. The Bold, Italic, and Underline buttons were non-functional stubs. Implemented document.execCommand triggers for the toolbar buttons.  Switch Case button now toggles selected text between UPPERCASE, lowercase, and Title Case.
+4. The Bold, Italic, and Underline buttons were non-functional stubs. Implemented document.execCommand triggers for the toolbar buttons.  Switch Case button now toggles selected text between UPPERCASE, lowercase, and Title Case.
 
-6. The "Select Directory" and file handling features only worked in Chromium-based browsers (Chrome/Edge). Added slightly betterfallbacks for Firefox, Safari, and older browsers:
+5. The "Select Directory" and file handling features only worked in Chromium-based browsers (Chrome/Edge). Added slightly betterfallbacks for Firefox, Safari, and older browsers:
 
-7. Markdown export is better. It converts HTML formatting tags into proper Markdown syntax (e.g., <b>text</b> → **text**) and handles more block types like delimiters and captions. Markdown import is also better: standard markdown is turned into native editor.js blocks.
+6. Markdown export is better. It converts HTML formatting tags into proper Markdown syntax (e.g., <b>text</b> → **text**) and handles more block types like delimiters and captions. Markdown import is also better: standard markdown is turned into native editor.js blocks.
 
-8. Start screen removed. Added a clear page function as well. Improved CSS slightly. File selection limited to .md and .txt because it's all too easy to free the whole thing by opening a 20MB word document or something equally stupid. 
+7. Start screen removed. Added a clear page function as well. Improved CSS slightly. File selection limited to .md and .txt because it's all too easy to free the whole thing by opening a 20MB word document or something equally stupid. 
 
 ## Name inspiration:
 *Wood Release (木遁, Mokuton, Viz: Wood Style) is a nature transformation kekkei genkai, a combination of Earth and Water Release.  It was famously used by Hashirama Senju, and in fact is not known to have naturally occurred in anyone else, with the exception of the Ten-Tails, whose true form is the God Tree, leading to it being regarded as impossible to use without having his cells. Because of Wood Release's power and versatility, there have been various efforts to reproduce it after Hashirama's death.* - https://naruto.fandom.com/wiki/Wood_Release
