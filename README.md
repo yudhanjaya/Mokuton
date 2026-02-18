@@ -38,39 +38,23 @@ Mokuton is built using Editor.js, Font Awesome for icons and Google Fonts for th
 ## License
 Mokuton Editor is open-source software licensed under the MIT license. Please enjoy it. I am not responsible for what you do with it, but I hope it's useful. 
 
-## Changelog for [1.1.0] - 2025-03-03
+## Changelog for [1.2.0] - 2026-02-18
 
+With the help of Gemini-CLI:
 
-#### Fixed "List is not defined" error:
+1. Mokuton-terminal removed. Dark mode added to Mokuton instead. The choice is persistent. 
 
-- Changed the imports to use specific versions of the EditorJS plugins
-- Added proper namespacing (window.List instead of just List)
-- Improved error handling during initialization
+2. Work was saved to localStorage but never loaded back, meaning a refresh would clear the editor.Added an initialization check that restores the editor's state from localStorage on startup. Text will now stay in the browser even if you close the tab or lose power. This also means you can just reload to fix any UI issues. 
 
+3. The progress meter was clearing and recreating 200 DOM elements on every keystroke, which would cause lag on low-power devices. The box grid is now created once at startup. typed words merely      toggle a .filled class on existing elements.
 
-#### Fixed the "Get Started" popup issue:
+4. The Bold, Italic, and Underline buttons were non-functional stubs. Implemented document.execCommand triggers for the toolbar buttons.  Switch Case button now toggles selected text between UPPERCASE, lowercase, and Title Case.
 
-- Fixed the event listener for the close button
-- Added a fallback 5-second auto-close timer
-- Wrapped the entire script in a DOMContentLoaded event to ensure elements exist
+5. The "Select Directory" and file handling features only worked in Chromium-based browsers (Chrome/Edge). Added slightly betterfallbacks for Firefox, Safari, and older browsers:
 
+6. Markdown export is better. It converts HTML formatting tags into proper Markdown syntax (e.g., <b>text</b> → **text**) and handles more block types like delimiters and captions. Markdown import is also better: standard markdown is turned into native editor.js blocks.
 
-#### - Fixed EditorJS integration issues:
-
-- Rewrote toolbar buttons to use proper event listeners rather than inline onclick
-- Restructured formatting functions to work with EditorJS API instead of document.execCommand
-- Fixed the rendering logic for loading files
-
-#### Improved error handling:
-
-- Added try/catch blocks in critical functions
-- Added fallbacks when operations fail
-- Added console logging to help with debugging
-
-#### New terminal version, ft Claude
-
-- I let Claude entirely handle the terminal version. It added some cool touches to the terminal experience, including a retro BIOS-style loading screen.
-- I don't entirely like the glitchy "multiple blinking lights" cursory-things, but I assume that's a simple fix for later
+7. Start screen removed. Added a clear page function as well. Improved CSS slightly. File selection limited to .md and .txt because it's all too easy to free the whole thing by opening a 20MB word document or something equally stupid. 
 
 ## Name inspiration:
 *Wood Release (木遁, Mokuton, Viz: Wood Style) is a nature transformation kekkei genkai, a combination of Earth and Water Release.  It was famously used by Hashirama Senju, and in fact is not known to have naturally occurred in anyone else, with the exception of the Ten-Tails, whose true form is the God Tree, leading to it being regarded as impossible to use without having his cells. Because of Wood Release's power and versatility, there have been various efforts to reproduce it after Hashirama's death.* - https://naruto.fandom.com/wiki/Wood_Release

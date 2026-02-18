@@ -16,14 +16,43 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
 
+        :root {
+            --bg-color: #F0F0F0;
+            --text-color: #333;
+            --sidebar-bg: #2F3136;
+            --sidebar-text: #DCDDDE;
+            --editor-bg: #FFFFFF;
+            --toolbar-bg: #F9F9F9;
+            --border-color: #D0D0D0;
+            --box-shadow: rgba(0,0,0,0.1);
+            --progress-empty: #EBEDF0;
+            --progress-filled: #39D353;
+            --card-bg: #FFFFFF;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #E0E0E0;
+            --sidebar-bg: #1A1A1A;
+            --sidebar-text: #B0B0B0;
+            --editor-bg: #1E1E1E;
+            --toolbar-bg: #252525;
+            --border-color: #444;
+            --box-shadow: rgba(0,0,0,0.5);
+            --progress-empty: #333;
+            --progress-filled: #2EA043;
+            --card-bg: #2D2D2D;
+        }
+
         body {
             font-family: 'Open Sans', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #F0F0F0;
-            color: #333;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .main-content {
@@ -40,8 +69,8 @@
         #toolbar {
             width: 100%;
             max-width: 800px;
-            background-color: #F9F9F9;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background-color: var(--toolbar-bg);
+            box-shadow: 0 2px 10px var(--box-shadow);
             padding: 10px;
             margin-bottom: 20px;
             display: flex;
@@ -49,6 +78,7 @@
             align-items: center;
             flex-wrap: wrap;
             border-radius: 5px;
+            border: 1px solid var(--border-color);
         }
 
         .toolbar-buttons {
@@ -58,34 +88,34 @@
 
         #toolbar button, #toolbar select {
             background-color: transparent;
-            border: 1px solid #D0D0D0;
+            border: 1px solid var(--border-color);
             padding: 5px 10px;
             margin: 2px;
             cursor: pointer;
             font-size: 14px;
             transition: background-color 0.3s, box-shadow 0.3s;
-            color: #444;
+            color: var(--text-color);
             border-radius: 3px;
         }
 
         #toolbar button:hover, #toolbar select:hover {
-            background-color: #E8E8E8;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: rgba(128, 128, 128, 0.1);
+            box-shadow: 0 1px 3px var(--box-shadow);
         }
 
         #logo {
             font-family: 'Merriweather', serif;
             font-size: 24px;
             font-weight: 700;
-            color: #333;
+            color: var(--text-color);
             margin-right: 20px;
         }
 
         #editorjs {
             width: 100%;
             max-width: 800px;
-            background-color: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            background-color: var(--editor-bg);
+            box-shadow: 0 0 20px var(--box-shadow);
             padding: 40px;
             min-height: calc(100vh - 200px);
             overflow-y: auto;
@@ -93,18 +123,49 @@
             font-family: 'Merriweather', serif;
             font-size: 18px;
             line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        /* EditorJS Overrides for Dark Mode */
+        .dark-mode .ce-block--selected .ce-block__content {
+            background-color: #2c2c2c;
+        }
+        .dark-mode .ce-inline-toolbar {
+            background-color: #333;
+            color: white;
+            border-color: #444;
+        }
+        .dark-mode .ce-inline-toolbar__button:hover {
+            background-color: #444;
+        }
+        .dark-mode .ce-toolbar__plus, .dark-mode .ce-toolbar__settings-btn {
+            color: #ccc;
+            background-color: #333;
+        }
+        .dark-mode .ce-popover {
+            background-color: #333;
+            color: white;
+            border-color: #444;
+        }
+        .dark-mode .ce-popover__item:hover {
+            background-color: #444;
+        }
+        .dark-mode .ce-popover__item-icon {
+            background-color: #444;
+            color: white;
         }
 
         #left-sidebar {
             width: 250px;
-            background-color: #2F3136;
-            color: #DCDDDE;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
             padding: 20px;
             overflow-y: auto;
             height: 100vh;
             position: fixed;
             left: 0;
             top: 0;
+            transition: background-color 0.3s;
         }
 
         #file-explorer {
@@ -119,14 +180,14 @@
         }
 
         #file-explorer li:hover {
-            background-color: #40444B;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         #right-sidebar {
             width: 100px;
             padding: 20px;
-            background-color: #FFFFFF;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            background-color: var(--editor-bg);
+            box-shadow: -5px 0 15px var(--box-shadow);
             overflow-y: auto;
             height: 100vh;
             position: fixed;
@@ -135,12 +196,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.3s;
         }
 
         #progress-meter {
             width: 60px;
             height: 80%;
-            background-color: #EBEDF0;
+            background-color: var(--progress-empty);
             border-radius: 3px;
             overflow: hidden;
             margin-top: 20px;
@@ -151,12 +213,12 @@
         }
 
         .progress-box {
-            background-color: #EBEDF0;
+            background-color: var(--progress-empty);
             transition: background-color 0.3s;
         }
 
         .progress-box.filled {
-            background-color: #39D353;
+            background-color: var(--progress-filled);
         }
 
         #word-count, #goal-count {
@@ -169,6 +231,9 @@
             width: 80px;
             margin-top: 10px;
             text-align: center;
+            background-color: var(--editor-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
         }
 
         .style-select-wrapper {
@@ -178,60 +243,33 @@
 
         .style-select-button {
             background-color: transparent;
-            border: 1px solid #D0D0D0;
+            border: 1px solid var(--border-color);
             padding: 5px 10px;
             margin: 2px;
             cursor: pointer;
             font-size: 14px;
             transition: background-color 0.3s, box-shadow 0.3s;
-            color: #444;
+            color: var(--text-color);
             border-radius: 3px;
             display: flex;
             align-items: center;
-        }
-
-        .style-select-button:hover {
-            background-color: #E8E8E8;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .style-select-button::after {
-            content: '\25BC';
-            margin-left: 5px;
         }
 
         .style-select-dropdown {
             position: absolute;
             top: 100%;
             left: 0;
-            background-color: white;
+            background-color: var(--editor-bg);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px var(--box-shadow);
             display: none;
             z-index: 1000;
             min-width: 150px;
         }
 
-        .style-select-wrapper:hover .style-select-dropdown {
-            display: block;
-        }
-
-        .style-select-option {
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-        }
-
         .style-select-option:hover {
-            background-color: #F0F0F0;
-        }
-
-        .style-select-option i {
-            margin-right: 8px;
-            width: 20px;
-            text-align: center;
+            background-color: rgba(128, 128, 128, 0.1);
         }
 
         #help-menu {
@@ -239,47 +277,26 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
+            background-color: var(--editor-bg);
+            color: var(--text-color);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            box-shadow: 0 0 20px var(--box-shadow);
             z-index: 1000;
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
             display: none;
-        }
-
-        #help-menu h2 {
-            color: #0078D4;
-            margin-bottom: 15px;
-        }
-
-        #help-menu table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        #help-menu th, #help-menu td {
-            border: 1px solid #E0E0E0;
-            padding: 8px;
-            text-align: left;
+            border: 1px solid var(--border-color);
         }
 
         #help-menu th {
-            background-color: #F9F9F9;
+            background-color: var(--toolbar-bg);
         }
 
-        #close-help {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #0078D4;
+        #help-menu th, #help-menu td {
+            border: 1px solid var(--border-color);
         }
 
         #select-directory, #back-button {
@@ -297,63 +314,14 @@
             margin-bottom: 10px;
         }
 
-        #select-directory:hover, #back-button:hover {
-            background-color: #005A9E;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        #select-directory i, #back-button i {
-            margin-right: 5px;
-        }
-
-        #back-button:disabled {
-            background-color: #CCCCCC;
-            cursor: not-allowed;
-        }
-
         #file-info {
-            margin-bottom: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
             font-size: 14px;
             color: #666;
-        }
-
-        #start-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        #start-screen-content {
-            background-color: white;
-            padding: 40px;
-            border-radius: 8px;
-            max-width: 600px;
-            text-align: center;
-        }
-
-        #start-screen h1 {
-            margin-bottom: 20px;
-        }
-
-        #start-screen p {
-            margin-bottom: 15px;
-        }
-
-        #close-start-screen {
-            background-color: #0078D4;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 16px;
+            max-width: 800px;
+            text-align: left;
         }
 
         @media (max-width: 1200px) {
@@ -429,6 +397,8 @@
                     </div>
                 </div>
                 <button id="bullet-button" title="Bullets"><i class="fas fa-list-ul"></i></button>
+                <button id="clear-button" title="Clear Page"><i class="fas fa-eraser"></i></button>
+                <button id="theme-toggle" title="Toggle Light/Dark Mode"><i class="fas fa-moon"></i></button>
                 <button id="load-button" title="Load Main"><i class="fas fa-file-upload"></i></button>
                 <button id="save-button" title="Save Main"><i class="fas fa-save"></i></button>
             </div>
@@ -500,21 +470,6 @@
         </table>
     </div>
 
-    <div id="start-screen">
-        <div id="start-screen-content">
-            <h1>Welcome to Mokuton Editor</h1>
-            <p>This is a powerful word processor with a daily word count goal tracker.</p>
-            <p>To get started:</p>
-            <ol style="text-align: left;">
-                <li>Use the left sidebar to explore and open files</li>
-                <li>Write your content in the main editor</li>
-                <li>Set your daily word count goal in the right sidebar</li>
-                <li>Track your progress with the GitHub-style progress meter</li>
-                <li>Use the toolbar for formatting options</li>
-            </ol>
-            <p>Enjoy writing with Mokuton Editor!</p>
-            <button id="close-start-screen">Get Started</button>
-        </div>
     </div>
 
     <script>
@@ -526,21 +481,32 @@
             let currentDirectoryIndex = -1;
             let editor; // Declare editor at a higher scope
 
-            // Start screen functionality - Fix for the popup issue
-            const startScreen = document.getElementById('start-screen');
-            const closeStartScreenBtn = document.getElementById('close-start-screen');
-            
-            closeStartScreenBtn.addEventListener('click', function() {
-                startScreen.style.display = 'none';
-            });
+            // Initialize progress meter grid
+            initProgressMeter();
 
-            // Fallback to close start screen if button doesn't work
-            setTimeout(function() {
-                if (startScreen && startScreen.style.display !== 'none') {
-                    console.log("Auto-closing start screen after timeout");
-                    startScreen.style.display = 'none';
+            // Load saved data from localStorage
+            const savedData = localStorage.getItem('editorjsData');
+            let initialData = {
+                blocks: [
+                    {
+                        type: "paragraph",
+                        data: {
+                            text: "Start writing here..."
+                        }
+                    }
+                ]
+            };
+
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed && parsed.blocks && parsed.blocks.length > 0) {
+                        initialData = parsed;
+                    }
+                } catch (e) {
+                    console.error('Failed to parse saved data', e);
                 }
-            }, 5000); // 5 second fallback
+            }
 
             // Initialize Editor.js with proper error handling
             try {
@@ -571,25 +537,13 @@
                         },
                         image: window.Image
                     },
-                    data: {
-                        blocks: [
-                            {
-                                type: "paragraph",
-                                data: {
-                                    text: "Start writing here..."
-                                }
-                            }
-                        ]
-                    },
+                    data: initialData,
                     onReady: () => {
                         console.log('Editor.js is ready to work!');
                         updateFileInfo();
                     },
                     onChange: () => {
-                        editor.save().then((outputData) => {
-                            localStorage.setItem('editorjsData', JSON.stringify(outputData));
-                            updateFileInfo();
-                        });
+                        updateFileInfo();
                     }
                 });
             } catch (err) {
@@ -604,7 +558,13 @@
                 
                 editor.save().then((outputData) => {
                     const wordCount = outputData.blocks.reduce((count, block) => {
-                        return count + (block.data.text ? block.data.text.split(/\s+/).filter(word => word.length > 0).length : 0);
+                        let text = "";
+                        if (block.data && block.data.text) {
+                            text = block.data.text;
+                        } else if (block.data && block.data.items) {
+                            text = block.data.items.join(" ");
+                        }
+                        return count + (text ? text.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length : 0);
                     }, 0);
                     const pageCount = Math.ceil(wordCount / 250);
                     
@@ -617,48 +577,104 @@
                     // Update progress meter
                     updateProgressMeter(wordCount);
 
-                    // Save word count to localStorage
+                    // Save data to localStorage
                     localStorage.setItem('dailyWordCount', wordCount);
+                    localStorage.setItem('editorjsData', JSON.stringify(outputData));
                 }).catch(err => {
                     console.error('Error saving editor data:', err);
                 });
             }
 
-            // Function to create and update the progress meter
-            function updateProgressMeter(wordCount) {
+            // Function to initialize the progress meter grid
+            function initProgressMeter() {
                 const progressMeter = document.getElementById('progress-meter');
-                const totalBoxes = 200; // 5 columns x 40 rows
-                const filledBoxes = Math.min(Math.floor((wordCount / wordCountGoal) * totalBoxes), totalBoxes);
-
-                // Clear existing boxes
                 progressMeter.innerHTML = '';
-
-                // Create new boxes
+                const totalBoxes = 200; 
                 for (let i = 0; i < totalBoxes; i++) {
                     const box = document.createElement('div');
                     box.className = 'progress-box';
-                    if (i < filledBoxes) {
-                        box.classList.add('filled');
-                    }
                     progressMeter.appendChild(box);
                 }
             }
 
-            // New EditorJS compatible formatting functions
+            // Function to update the progress meter
+            function updateProgressMeter(wordCount) {
+                const progressMeter = document.getElementById('progress-meter');
+                const boxes = progressMeter.querySelectorAll('.progress-box');
+                if (boxes.length === 0) return;
+                
+                const totalBoxes = boxes.length;
+                const filledBoxes = Math.min(Math.floor((wordCount / wordCountGoal) * totalBoxes), totalBoxes);
+
+                for (let i = 0; i < totalBoxes; i++) {
+                    if (i < filledBoxes) {
+                        boxes[i].classList.add('filled');
+                    } else {
+                        boxes[i].classList.remove('filled');
+                    }
+                }
+            }
+
+            // Formatting functions
             function applyFormatting(format) {
                 if (!editor) return;
                 
-                // Note: This is a simplified approach. To fully implement formatting,
-                // you would need to use EditorJS API methods or create custom inline tools
-                console.log(`Attempting to apply formatting: ${format}`);
+                // Focus back to editor if needed
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    document.execCommand(format, false, null);
+                }
+            }
+
+            function toggleCase() {
+                const selection = window.getSelection();
+                if (!selection.rangeCount) return;
+
+                const range = selection.getRangeAt(0);
+                const text = range.toString();
+                if (!text) return;
+
+                let newText;
+                if (text === text.toUpperCase()) {
+                    newText = text.toLowerCase();
+                } else if (text === text.toLowerCase()) {
+                    // Title Case
+                    newText = text.replace(/\b\w/g, l => l.toUpperCase());
+                } else {
+                    newText = text.toUpperCase();
+                }
+
+                document.execCommand('insertText', false, newText);
             }
 
             // Connect toolbar buttons with EditorJS actions
-            document.getElementById('bold-button').addEventListener('click', () => applyFormatting('bold'));
-            document.getElementById('italic-button').addEventListener('click', () => applyFormatting('italic'));
-            document.getElementById('underline-button').addEventListener('click', () => applyFormatting('underline'));
-            document.getElementById('case-button').addEventListener('click', () => applyFormatting('case'));
-            document.getElementById('bullet-button').addEventListener('click', () => {
+            document.getElementById('bold-button').addEventListener('click', (e) => {
+                e.preventDefault();
+                applyFormatting('bold');
+            });
+            document.getElementById('italic-button').addEventListener('click', (e) => {
+                e.preventDefault();
+                applyFormatting('italic');
+            });
+            document.getElementById('underline-button').addEventListener('click', (e) => {
+                e.preventDefault();
+                applyFormatting('underline');
+            });
+                        document.getElementById('case-button').addEventListener('click', (e) => {
+                            e.preventDefault();
+                            toggleCase();
+                        });
+            
+                        document.getElementById('clear-button').addEventListener('click', () => {
+                            if (confirm('Are you sure you want to clear the entire page? This cannot be undone.')) {
+                                if (editor) {
+                                    editor.clear();
+                                    updateFileInfo();
+                                }
+                            }
+                        });
+            
+                        document.getElementById('bullet-button').addEventListener('click', () => {
                 if (!editor) return;
                 
                 // Add a new list block
@@ -705,26 +721,17 @@
                 if (!editor) return;
                 
                 try {
-                    // Try to parse the content as JSON
+                    // Try to parse the content as JSON (EditorJS format)
                     const jsonContent = JSON.parse(content);
                     
-                    // Make sure the JSON structure matches EditorJS expectations
                     if (!jsonContent.blocks) {
                         throw new Error("Invalid EditorJS data format");
                     }
                     
                     editor.render(jsonContent);
                 } catch (error) {
-                    console.log('Loading as plain text');
-                    // If parsing as JSON fails, treat it as plain text
-                    const blocks = content.split('\n')
-                        .filter(line => line.trim() !== '')
-                        .map(line => ({
-                            type: 'paragraph',
-                            data: {
-                                text: line.trim()
-                            }
-                        }));
+                    console.log('Parsing as Markdown/Plain Text');
+                    const blocks = parseMarkdownToBlocks(content);
                     
                     editor.render({
                         blocks: blocks,
@@ -736,8 +743,127 @@
                 updateFileInfo();
             }
 
+            // Function to parse Markdown string into EditorJS blocks
+            function parseMarkdownToBlocks(markdown) {
+                const lines = markdown.split('\n');
+                const blocks = [];
+                let currentList = null;
+
+                const markdownToHtml = (text) => {
+                    return text
+                        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                        .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                        .replace(/__(.*?)__/g, '<b>$1</b>')
+                        .replace(/_(.*?)_/g, '<i>$1</i>')
+                        .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+                };
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trimEnd();
+                    const trimmed = line.trim();
+                    
+                    if (!trimmed) {
+                        currentList = null;
+                        continue;
+                    }
+
+                    // Headers
+                    const headerMatch = trimmed.match(/^(#{1,6})\s+(.*)/);
+                    if (headerMatch) {
+                        currentList = null;
+                        blocks.push({
+                            type: 'header',
+                            data: {
+                                text: markdownToHtml(headerMatch[2]),
+                                level: Math.min(headerMatch[1].length, 3) // EditorJS Header plugin usually supports 1-3
+                            }
+                        });
+                        continue;
+                    }
+
+                    // Quotes
+                    if (trimmed.startsWith('> ')) {
+                        currentList = null;
+                        blocks.push({
+                            type: 'quote',
+                            data: {
+                                text: markdownToHtml(trimmed.substring(2)),
+                                caption: ''
+                            }
+                        });
+                        continue;
+                    }
+
+                    // Unordered Lists
+                    const uListMatch = trimmed.match(/^[-*+]\s+(.*)/);
+                    if (uListMatch) {
+                        if (currentList && currentList.type === 'list' && currentList.data.style === 'unordered') {
+                            currentList.data.items.push(markdownToHtml(uListMatch[1]));
+                        } else {
+                            currentList = {
+                                type: 'list',
+                                data: {
+                                    style: 'unordered',
+                                    items: [markdownToHtml(uListMatch[1])]
+                                }
+                            };
+                            blocks.push(currentList);
+                        }
+                        continue;
+                    }
+
+                    // Ordered Lists
+                    const oListMatch = trimmed.match(/^\d+\.\s+(.*)/);
+                    if (oListMatch) {
+                        if (currentList && currentList.type === 'list' && currentList.data.style === 'ordered') {
+                            currentList.data.items.push(markdownToHtml(oListMatch[1]));
+                        } else {
+                            currentList = {
+                                type: 'list',
+                                data: {
+                                    style: 'ordered',
+                                    items: [markdownToHtml(oListMatch[1])]
+                                }
+                            };
+                            blocks.push(currentList);
+                        }
+                        continue;
+                    }
+
+                    // Horizontal Rule
+                    if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
+                        currentList = null;
+                        blocks.push({ type: 'delimiter', data: {} });
+                        continue;
+                    }
+
+                    // Default to Paragraph
+                    currentList = null;
+                    blocks.push({
+                        type: 'paragraph',
+                        data: {
+                            text: markdownToHtml(line)
+                        }
+                    });
+                }
+                
+                // Fallback for empty content
+                if (blocks.length === 0) {
+                    blocks.push({
+                        type: 'paragraph',
+                        data: { text: '' }
+                    });
+                }
+                
+                return blocks;
+            }
+
             // Function to select directory and populate file explorer
             async function selectDirectory() {
+                if (!window.showDirectoryPicker) {
+                    alert("Your browser does not support directory access. This feature is available in Chrome, Edge, and other Chromium browsers. Please use the 'Load' button for individual files.");
+                    return;
+                }
                 try {
                     const directoryHandle = await window.showDirectoryPicker();
                     directoryHistory = [directoryHandle];
@@ -767,6 +893,10 @@
                     for (const entry of entries) {
                         const li = document.createElement('li');
                         if (entry.kind === 'file') {
+                            // Only show .md and .txt files
+                            if (!entry.name.toLowerCase().endsWith('.md') && !entry.name.toLowerCase().endsWith('.txt')) {
+                                continue;
+                            }
                             li.textContent = entry.name;
                             li.onclick = async () => {
                                 try {
@@ -822,13 +952,37 @@
 
             // Function to load file
             document.getElementById('load-button').addEventListener('click', async function() {
-                try {
-                    const [fileHandle] = await window.showOpenFilePicker();
-                    const file = await fileHandle.getFile();
-                    const content = await file.text();
-                    loadFileContent(content, file.name);
-                } catch (error) {
-                    console.error('Error loading file:', error);
+                if (window.showOpenFilePicker) {
+                    try {
+                        const [fileHandle] = await window.showOpenFilePicker({
+                            types: [
+                                {
+                                    description: 'Text Files',
+                                    accept: {
+                                        'text/markdown': ['.md'],
+                                        'text/plain': ['.txt']
+                                    }
+                                }
+                            ]
+                        });
+                        const file = await fileHandle.getFile();
+                        const content = await file.text();
+                        loadFileContent(content, file.name);
+                    } catch (error) {
+                        console.error('Error loading file:', error);
+                    }
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.md,.txt';
+                    input.onchange = async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const content = await file.text();
+                            loadFileContent(content, file.name);
+                        }
+                    };
+                    input.click();
                 }
             });
 
@@ -836,25 +990,39 @@
             document.getElementById('save-button').addEventListener('click', async function() {
                 if (!editor) return;
                 
-                try {
-                    const options = {
-                        types: [
-                            {
-                                description: 'Markdown Files',
-                                accept: {'text/markdown': ['.md']},
-                            },
-                        ],
-                    };
-                    const fileHandle = await window.showSaveFilePicker(options);
-                    const writable = await fileHandle.createWritable();
-                    
-                    const editorContent = await editor.save();
-                    const content = convertToMarkdown(editorContent);
-                    
-                    await writable.write(content);
-                    await writable.close();
-                } catch (error) {
-                    console.error('Error saving file:', error);
+                const editorContent = await editor.save();
+                const content = convertToMarkdown(editorContent);
+
+                if (window.showSaveFilePicker) {
+                    try {
+                        const options = {
+                            suggestedName: currentFileName,
+                            types: [
+                                {
+                                    description: 'Markdown Files',
+                                    accept: {'text/markdown': ['.md']},
+                                },
+                                {
+                                    description: 'Text Files',
+                                    accept: {'text/plain': ['.txt']},
+                                },
+                            ],
+                        };
+                        const fileHandle = await window.showSaveFilePicker(options);
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(content);
+                        await writable.close();
+                    } catch (error) {
+                        console.error('Error saving file:', error);
+                    }
+                } else {
+                    const blob = new Blob([content], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = currentFileName.endsWith('.md') ? currentFileName : currentFileName + '.md';
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 100);
                 }
             });
 
@@ -862,25 +1030,42 @@
             function convertToMarkdown(editorData) {
                 let markdown = '';
                 
+                const cleanText = (text) => {
+                    if (!text) return "";
+                    return text
+                        .replace(/<b>(.*?)<\/b>/g, '**$1**')
+                        .replace(/<i>(.*?)<\/i>/g, '*$1*')
+                        .replace(/<u>(.*?)<\/u>/g, '$1') // Markdown doesn't natively support underline
+                        .replace(/&nbsp;/g, ' ')
+                        .replace(/&amp;/g, '&')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>');
+                };
+
                 for (const block of editorData.blocks) {
                     switch (block.type) {
                         case 'header':
-                            markdown += '#'.repeat(block.data.level) + ' ' + block.data.text + '\n\n';
+                            markdown += '#'.repeat(block.data.level) + ' ' + cleanText(block.data.text) + '\n\n';
                             break;
                         case 'paragraph':
-                            markdown += block.data.text + '\n\n';
+                            markdown += cleanText(block.data.text) + '\n\n';
                             break;
                         case 'list':
                             for (const item of block.data.items) {
-                                markdown += (block.data.style === 'ordered' ? '1. ' : '- ') + item + '\n';
+                                markdown += (block.data.style === 'ordered' ? '1. ' : '- ') + cleanText(item) + '\n';
                             }
                             markdown += '\n';
                             break;
                         case 'quote':
-                            markdown += '> ' + block.data.text + '\n\n';
+                            markdown += '> ' + cleanText(block.data.text) + '\n';
+                            if (block.data.caption) markdown += '> — ' + cleanText(block.data.caption) + '\n';
+                            markdown += '\n';
                             break;
                         case 'image':
-                            markdown += `![${block.data.caption || 'image'}](${block.data.url})\n\n`;
+                            markdown += `![${cleanText(block.data.caption) || 'image'}](${block.data.url})\n\n`;
+                            break;
+                        case 'delimiter':
+                            markdown += '---\n\n';
                             break;
                         default:
                             console.warn(`Unsupported block type: ${block.type}`);
@@ -898,6 +1083,30 @@
                 localStorage.setItem('wordCountGoal', wordCountGoal);
                 updateFileInfo();
             }
+
+            // Theme Toggle Logic
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const icon = themeToggleBtn.querySelector('i');
+            
+            function setTheme(theme) {
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    icon.classList.replace('fa-moon', 'fa-sun');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    icon.classList.replace('fa-sun', 'fa-moon');
+                }
+                localStorage.setItem('mokuton-theme', theme);
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                const isDark = document.body.classList.contains('dark-mode');
+                setTheme(isDark ? 'light' : 'dark');
+            });
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('mokuton-theme') || 'light';
+            setTheme(savedTheme);
 
             // Toggle help menu
             function toggleHelpMenu() {
@@ -925,6 +1134,7 @@
                         case 'u': e.preventDefault(); document.getElementById('underline-button').click(); break;
                         case 'o': e.preventDefault(); document.getElementById('load-button').click(); break;
                         case 's': e.preventDefault(); document.getElementById('save-button').click(); break;
+                        case 'm': e.preventDefault(); themeToggleBtn.click(); break; // Ctrl+M for theme
                         case '/': e.preventDefault(); toggleHelpMenu(); break;
                     }
                 } else if (e.ctrlKey && e.shiftKey && !e.altKey) {
