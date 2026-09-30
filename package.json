@@ -1,0 +1,31 @@
+{
+  "name": "mokuton",
+  "type": "module",
+  "version": "1.3.0",
+  "description": "A simple, no-frills block-style writing app with daily word goals.",
+  "author": "Yudhanjaya Wijeratne <yudhanjaya@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/yudhanjaya/Mokuton",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "jsdom": "^30.1.1"
+  },
+  "dependencies": {
+    "@editorjs/delimiter": "^1.4.2",
+    "@editorjs/editorjs": "^2.31.7",
+    "@editorjs/header": "^2.8.9",
+    "@editorjs/list": "^2.0.9",
+    "@editorjs/quote": "^2.7.6",
+    "@editorjs/underline": "^1.2.1",
+    "@fontsource/merriweather": "^5.3.0",
+    "@fontsource/open-sans": "^5.3.0",
+    "@fortawesome/fontawesome-free": "^7.3.1",
+    "dompurify": "^3.4.16",
+    "marked": "^18.0.14",
+    "turndown": "^7.2.4"
+  }
+}

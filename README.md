@@ -19,19 +19,56 @@ Mokuton does exactly that. You open it in your browser and start writing: that's
 
 ## Usage
 
- - Download and open mokuton.html. 
- - Use the left sidebar to navigate your directories and open files. Set your daily word count goal in the right sidebar.
- - Click in the main editor area to start writing.
- - Use the top toolbar for formatting; if you need to figure out keyboard shortcuts, click the help icon.
+Download `mokuton.html` and open it in any modern browser. Everything (editor, fonts, icons) is inlined, so there is nothing to install and it works with no internet connection.
 
+ - Use the left sidebar (**Open Folder**) to browse a directory and open `.md`/`.txt` files. `Ctrl+S` saves back to the file you opened; `Ctrl+Shift+S` is Save As.
+ - Set your daily word goal in the right sidebar. The meter tracks words you have *written today* (opening a file doesn't count) and keeps a streak.
+ - Click in the editor and write. `Ctrl+/` shows the keyboard shortcuts; `Ctrl+Shift+F` is focus mode.
+ - Your draft is autosaved in the browser as you type. Turn on the ⟳ toolbar button to also autosave into the open file.
 
+### Browser differences
 
+| | Chrome, Edge, other Chromium browsers | Firefox, Safari |
+|---|---|---|
+| Open / Save files | Real files; `Ctrl+S` saves back in place | Open works, but Save downloads a new `.md` each time |
+| Open Folder sidebar | Yes | Not available (use the Open button) |
+| Autosave to the open file | Yes (the browser may ask for write permission again after a restart) | No |
+
+Your in-progress draft is kept in the browser's storage **for that file's location**. Opening `mokuton.html` from a different folder or a different browser starts fresh, and clearing site data erases the draft. Save to a `.md` file regularly; that is the copy that isn't tied to one browser profile.
+
+## Building from source
+
+You only need this if you want to change the editor. Requires Node 20+.
+
+```bash
+npm install
+npm test          # unit tests (markdown + goal tracking)
+npm run build     # regenerates mokuton.html from src/
+```
+
+```
+src/         app source (index.html, style.css, app.js, markdown.js, goals.js, files.js)
+build.mjs    esbuild bundler that inlines everything into mokuton.html
+test/        node --test unit tests
+```
 
 ## Acknowledgements
-Mokuton is built using Editor.js, Font Awesome for icons and Google Fonts for the fonts used. If you want to put together your own writing interface, I highly recommend Editor.js.
+Mokuton is built using Editor.js, Font Awesome for icons and Merriweather/Open Sans (via Fontsource) for the fonts, plus marked, Turndown and DOMPurify for Markdown handling. All of it is bundled locally; nothing is fetched from a CDN. If you want to put together your own writing interface, I highly recommend Editor.js.
 
 ## License
 Mokuton Editor is open-source software licensed under the MIT license. Please enjoy it. I am not responsible for what you do with it, but I hope it's useful. 
+
+## Changelog for [1.3.0]
+
+- **Works offline for real.** Editor.js, its plugins, Font Awesome and the fonts are bundled instead of loaded from CDNs, and there is now a build step. `mokuton.html` is a single self-contained file.
+- **Security:** imported Markdown/text is sanitized (it previously went into the page as raw HTML, so a crafted `.md` could run script).
+- **Real saving:** `Ctrl+S` writes back to the opened file (Save As is `Ctrl+Shift+S`), with optional autosave to that file, an unsaved-changes marker, and prompts before discarding work.
+- **Daily goal fixed:** it now counts words written *today* (net), ignores files you open, resets at midnight, and shows a streak. Previously it was just the document's total word count.
+- **Fixes:** the help dialog needed two clicks to open; the text-style dropdown could never be opened and the heading/bullet buttons inserted new blocks instead of converting the current one; underline wasn't a real Editor.js tool, so it wasn't kept when saving; the image tool was wired to the wrong global and Markdown `---` crashed the editor because the divider tool wasn't loaded.
+- **Markdown:** proper parser for import (nested lists, checklists, hard-wrapped paragraphs, `snake_case` no longer italicised) and export (links, underline, nested and numbered lists, quotes with attribution). Plain `.txt` files are handled as text.
+- **Editor:** upgraded to Editor.js 2.31 and List 2 (nested lists, checklists), Heading 1-4, quotes, dividers.
+- **Writing UX:** focus mode (`Ctrl+Shift+F`), collapsible side panels, system dark-mode default, debounced saving with storage-full warning, keyboard/screen-reader labels.
+- The image block was removed (it never worked); old saved drafts are migrated automatically.
 
 ## Changelog for [1.2.0] - 2026-02-18
 

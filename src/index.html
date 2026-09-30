@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mokuton</title>
+    <!--STYLE-->
+</head>
+<body>
+    <aside id="left-sidebar" aria-label="File explorer">
+        <h2>Files</h2>
+        <button id="select-directory" class="primary"><i class="fas fa-folder-open" aria-hidden="true"></i> Open Folder</button>
+        <button id="back-button" class="primary" disabled><i class="fas fa-arrow-left" aria-hidden="true"></i> Back</button>
+        <ul id="file-explorer"></ul>
+    </aside>
+
+    <main class="main-content">
+        <div id="toolbar" role="toolbar" aria-label="Formatting">
+            <div id="logo">Mokuton</div>
+            <div class="toolbar-buttons">
+                <button id="bold-button" title="Bold (Ctrl+B)" aria-label="Bold"><i class="fas fa-bold" aria-hidden="true"></i></button>
+                <button id="italic-button" title="Italic (Ctrl+I)" aria-label="Italic"><i class="fas fa-italic" aria-hidden="true"></i></button>
+                <button id="underline-button" title="Underline (Ctrl+U)" aria-label="Underline"><i class="fas fa-underline" aria-hidden="true"></i></button>
+                <button id="case-button" title="Switch case (Ctrl+Shift+X)" aria-label="Switch case"><i class="fas fa-font" aria-hidden="true"></i></button>
+                <div class="style-select-wrapper">
+                    <button id="style-button" class="style-select-button" title="Block style" aria-haspopup="true" aria-expanded="false">Paragraph <i class="fas fa-caret-down" aria-hidden="true"></i></button>
+                    <div id="style-dropdown" class="style-select-dropdown" role="menu">
+                        <button role="menuitem" data-type="paragraph">Paragraph</button>
+                        <button role="menuitem" data-type="header" data-level="1">Heading 1</button>
+                        <button role="menuitem" data-type="header" data-level="2">Heading 2</button>
+                        <button role="menuitem" data-type="header" data-level="3">Heading 3</button>
+                        <button role="menuitem" data-type="quote">Quote</button>
+                        <button role="menuitem" data-type="list" data-style="unordered">Bulleted list</button>
+                        <button role="menuitem" data-type="list" data-style="ordered">Numbered list</button>
+                    </div>
+                </div>
+                <button id="bullet-button" title="Bullets (Ctrl+Shift+L)" aria-label="Toggle bullet list"><i class="fas fa-list-ul" aria-hidden="true"></i></button>
+                <button id="new-button" title="New document (Ctrl+N)" aria-label="New document"><i class="fas fa-file" aria-hidden="true"></i></button>
+                <button id="clear-button" title="Clear page" aria-label="Clear page"><i class="fas fa-eraser" aria-hidden="true"></i></button>
+                <button id="focus-button" title="Focus mode (Ctrl+Shift+F)" aria-label="Focus mode"><i class="fas fa-expand" aria-hidden="true"></i></button>
+                <button id="theme-toggle" title="Toggle light/dark (Ctrl+M)" aria-label="Toggle theme"><i class="fas fa-moon" aria-hidden="true"></i></button>
+                <button id="load-button" title="Open (Ctrl+O)" aria-label="Open file"><i class="fas fa-file-upload" aria-hidden="true"></i></button>
+                <button id="save-button" title="Save (Ctrl+S)" aria-label="Save file"><i class="fas fa-save" aria-hidden="true"></i></button>
+                <button id="autosave-button" title="Autosave to file: off" aria-label="Toggle autosave to file" aria-pressed="false"><i class="fas fa-rotate" aria-hidden="true"></i></button>
+                <button id="help-button" title="Help (Ctrl+/)" aria-label="Help"><i class="fas fa-question-circle" aria-hidden="true"></i></button>
+            </div>
+        </div>
+        <div id="file-info" aria-live="polite"></div>
+        <div id="editorjs"></div>
+    </main>
+
+    <aside id="right-sidebar" aria-label="Daily goal">
+        <div id="progress-meter" role="progressbar" aria-label="Daily word goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+        <div id="word-count">0 today</div>
+        <div id="goal-count">Goal: 1000</div>
+        <label class="sr-only" for="goal-input">Daily word goal</label>
+        <input type="number" id="goal-input" value="1000" min="1">
+        <div id="streak"></div>
+    </aside>
+
+    <button id="left-toggle" class="edge-toggle" title="Toggle file panel" aria-label="Toggle file panel"><i class="fas fa-bars" aria-hidden="true"></i></button>
+    <button id="right-toggle" class="edge-toggle" title="Toggle goal panel" aria-label="Toggle goal panel"><i class="fas fa-chart-simple" aria-hidden="true"></i></button>
+
+    <div id="help-menu" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+        <button id="close-help" aria-label="Close help">&times;</button>
+        <h2 id="help-title">Keyboard shortcuts</h2>
+        <table>
+            <tr><th>Action</th><th>Shortcut</th></tr>
+            <tr><td>Bold / Italic / Underline</td><td>Ctrl+B / I / U</td></tr>
+            <tr><td>Switch case</td><td>Ctrl+Shift+X</td></tr>
+            <tr><td>Bullet list</td><td>Ctrl+Shift+L</td></tr>
+            <tr><td>Paragraph / Heading 1 / Heading 2</td><td>Ctrl+Alt+0 / 1 / 2</td></tr>
+            <tr><td>New / Open</td><td>Ctrl+N / Ctrl+O</td></tr>
+            <tr><td>Save / Save as</td><td>Ctrl+S / Ctrl+Shift+S</td></tr>
+            <tr><td>Focus mode</td><td>Ctrl+Shift+F</td></tr>
+            <tr><td>Toggle theme</td><td>Ctrl+M</td></tr>
+            <tr><td>Toggle help</td><td>Ctrl+/</td></tr>
+        </table>
+        <p class="help-note">Cmd works in place of Ctrl on macOS. Your work is autosaved in this app; if a file is open it is also autosaved to that file.</p>
+    </div>
+
+    <!--SCRIPT-->
+</body>
+</html>
